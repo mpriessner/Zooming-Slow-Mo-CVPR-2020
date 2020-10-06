@@ -86,8 +86,8 @@ def flip(source_img, name, path):
     io.imsave(path + "/"+"{}.tif".format(name),source_img)
     io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
 
-def change_axis(img):
-    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
-    img = np.swapaxes(img, 1, 2)
-    return img
+#def change_axis(img):
+#    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
+#    img = np.swapaxes(img, 1, 2)
+#    return img
 
