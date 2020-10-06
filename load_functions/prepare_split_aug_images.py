@@ -68,26 +68,25 @@ def rotation_aug(source_img, name, path, flip=False):
       #source_img_90_ud = np.flipud(source_img_90)
     # Save the augmented files
     # Source images
-    io.imsave(path + "/"+"{}.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_90.tif".format(name),source_img_90)
-    io.imsave(path + "/"+"{}_180.tif".format(name),source_img_180)
-    io.imsave(path + "/"+"{}_270.tif".format(name),source_img_270)
+    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
+    io.imsave(path + "/"+"{}_permutation-01.tif".format(name),source_img_90)
+    io.imsave(path + "/"+"{}_permutation-02.tif".format(name),source_img_180)
+    io.imsave(path + "/"+"{}_permutation-03.tif".format(name),source_img_270)
     # Target images
    
     if flip == True:
-      io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
-      io.imsave(path + "/"+"{}_90_lr.tif".format(name),source_img_90_lr)
-      io.imsave(path + "/"+"{}_180_lr.tif".format(name),source_img_180_lr) 
-      io.imsave(path + "/"+"{}_270_lr.tif".format(name),source_img_270_lr)
+      io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
+      io.imsave(path + "/"+"{}_permutation-05.tif".format(name),source_img_90_lr)
+      io.imsave(path + "/"+"{}_permutation-06.tif".format(name),source_img_180_lr) 
+      io.imsave(path + "/"+"{}_permutation-07.tif".format(name),source_img_270_lr)
 
  
 def flip(source_img, name, path):
     source_img_lr = np.fliplr(source_img)
-    io.imsave(path + "/"+"{}.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
+    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
+    io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
 
 #def change_axis(img):
 #    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
 #    img = np.swapaxes(img, 1, 2)
 #    return img
-
