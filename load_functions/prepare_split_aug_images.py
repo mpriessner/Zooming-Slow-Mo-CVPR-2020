@@ -1,3 +1,5 @@
+#prepare_split_aug_images.py
+#UPDATED CHECK
 from skimage import io
 import numpy as np
 from tqdm import tqdm
@@ -35,8 +37,8 @@ def make_folder_with_date(save_location, name):
 def diplay_img_info(img, divisor):
   ### display image data
     image_resolution = img.shape[-1]
-    nr_z_slices = img.shape[2]
-    nr_channels = img.shape[0]
+    nr_z_slices = img.shape[3]
+    nr_channels = img.shape[2]
     nr_timepoints = img.shape[1]
     x_dim = img.shape[-1]
     y_dim = img.shape[-2] 
@@ -53,9 +55,9 @@ def diplay_img_info(img, divisor):
 def rotation_aug(source_img, name, path, flip=False):
     print(source_img.shape)
     # Source Rotation
-    source_img_90 = np.rot90(source_img,axes=(2,3))
-    source_img_180 = np.rot90(source_img_90,axes=(2,3))
-    source_img_270 = np.rot90(source_img_180,axes=(2,3))
+    source_img_90 = np.rot90(source_img,axes=(4,5))
+    source_img_180 = np.rot90(source_img_90,axes=(4,5))
+    source_img_270 = np.rot90(source_img_180,axes=(4,5))
     # Add a flip to the rotation
     if flip == True:
       source_img_lr = np.fliplr(source_img)
@@ -83,3 +85,9 @@ def flip(source_img, name, path):
     source_img_lr = np.fliplr(source_img)
     io.imsave(path + "/"+"{}.tif".format(name),source_img)
     io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
+
+def change_axis(img):
+    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
+    img = np.swapaxes(img, 1, 2)
+    return img
+
