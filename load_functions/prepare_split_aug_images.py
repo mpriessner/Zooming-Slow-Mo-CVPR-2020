@@ -66,30 +66,20 @@ def rotation_aug(source_img, name, path, flip=False):
       #source_img_90_ud = np.flipud(source_img_90)
     # Save the augmented files
     # Source images
-    with OmeTiffWriter(path + "/" + name + ".tif") as writer2:
-        writer2.save(source_img, dimension_order='TZYX')  
-    with OmeTiffWriter(path + "/" + name +'_90.tif') as writer2:
-        writer2.save(source_img_90, dimension_order='TZYX')  
-    with OmeTiffWriter(path + "/" + name +'_180.tif') as writer2:
-        writer2.save(source_img_180, dimension_order='TZYX')  
-    with OmeTiffWriter(path + "/" + name +'_270.tif') as writer2:
-      writer2.save(source_img_270, dimension_order='TZYX')  
+    io.imsave(path + "/"+"{}.tif".format(name),source_img)
+    io.imsave(path + "/"+"{}_90.tif".format(name),source_img_90)
+    io.imsave(path + "/"+"{}_180.tif".format(name),source_img_180)
+    io.imsave(path + "/"+"{}_270.tif".format(name),source_img_270)
     # Target images
    
     if flip == True:
-      with OmeTiffWriter(path + "/" + name + '_lr.tif') as writer2:
-        writer2.save(source_img_lr, dimension_order='TZYX')  
-      with OmeTiffWriter(path + "/" + name + '_90_lr.tif') as writer2:
-          writer2.save(source_img_90_lr, dimension_order='TZYX')  
-      with OmeTiffWriter(path + "/" + name + '_180_lr.tif') as writer2:
-          writer2.save(source_img_180_lr, dimension_order='TZYX')  
-      with OmeTiffWriter(path + "/" + name + '_270_lr.tif') as writer2:
-        writer2.save(source_img_270_lr, dimension_order='TZYX')  
+      io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
+      io.imsave(path + "/"+"{}_90_lr.tif".format(name),source_img_90_lr)
+      io.imsave(path + "/"+"{}_180_lr.tif".format(name),source_img_180_lr) 
+      io.imsave(path + "/"+"{}_270_lr.tif".format(name),source_img_270_lr)
 
  
 def flip(source_img, name, path):
     source_img_lr = np.fliplr(source_img)
-    with OmeTiffWriter(path + "/" + name + ".tif") as writer2:
-        writer2.save(source_img, dimension_order='TZYX')  
-    with OmeTiffWriter(path + "/" + name + '_lr.tif') as writer2:
-      writer2.save(source_img_lr, dimension_order='TZYX')
+    io.imsave(path + "/"+"{}.tif".format(name),source_img)
+    io.imsave(path + "/"+"{}_lr.tif".format(name),source_img_lr)
