@@ -1,10 +1,11 @@
+#train_zsm.yml
 #### general settings
 name: LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo
 use_tb_logger: false #true
 model: VideoSR_base
 distortion: sr
 scale: 4
-gpu_ids: [2]
+gpu_ids: [0]  ### changes from [2] to [0] because I just use 1 gpu in google colab
 
 #### datasets
 datasets:
@@ -14,9 +15,9 @@ datasets:
     interval_list: [1]
     random_reverse: true #false
     border_mode: false
-    dataroot_GT: /data/datasets/SR/vimeo_septuplet/vimeo7_train_GT.lmdb
-    dataroot_LQ: /data/datasets/SR/vimeo_septuplet/vimeo7_train_LR7.lmdb
-    cache_keys: Vimeo7_train_keys.pkl 
+    dataroot_GT: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/HR/x4/GT.lmdb                ### change
+    dataroot_LQ: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/LR/x4/LRx4.lmdb              ### change
+    cache_keys: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/HR/x4/GT.lmdb/meta_info.pkl   ### change
 
     N_frames: 7
     use_shuffle: true
