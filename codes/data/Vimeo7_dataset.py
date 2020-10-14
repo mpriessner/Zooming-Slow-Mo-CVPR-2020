@@ -2,6 +2,7 @@
 Vimeo7 dataset
 support reading images from lmdb, image folder and memcached
 '''
+import os
 import os.path as osp
 import random
 import pickle
@@ -62,7 +63,7 @@ class Vimeo7Dataset(data.Dataset):
         else:
             cache_keys = 'Vimeo7_train_keys.pkl'
         logger.info('Using cache keys - {}.'.format(cache_keys))
-        self.paths_GT = pickle.load(open('./data/{}'.format(cache_keys), 'rb'))
+        self.paths_GT = pickle.load(open('{}'.format(cache_keys), 'rb')) ### changed to get the full location of the keys file in
      
         assert self.paths_GT, 'Error: GT path is empty.'
 
