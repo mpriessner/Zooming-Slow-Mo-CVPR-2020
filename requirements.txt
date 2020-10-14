@@ -7,3 +7,4 @@ pyyaml
 pickle5
 matplotlib
 seaborn
+Pillow==6.1
