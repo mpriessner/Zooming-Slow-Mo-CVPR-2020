@@ -9,7 +9,6 @@ from aicsimageio import AICSImage, imread
 from aicsimageio.transforms import reshape_data
 from aicsimageio.writers import png_writer 
 import numpy as np
-
 def get_file_list(folder_path):
   # get a list of files in the folder
   flist = os.listdir(folder_path)
