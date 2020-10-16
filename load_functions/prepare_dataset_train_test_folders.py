@@ -1,47 +1,27 @@
-import os
-from aicsimageio import AICSImage, imread
-import shutil
-import time
-import numpy
-import random
-from aicsimageio import AICSImage, imread
-from aicsimageio.writers import png_writer 
-import numpy as np
-from tqdm import tqdm
-from google.colab.patches import cv2_imshow
-from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
-from tqdm import tqdm
-from timeit import default_timer as timer
-import imageio
-import tifffile 
-from aicsimageio.transforms import reshape_data
-from datetime import datetime
-import math
-
 #WORKING
 def downsample_z_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
-    t, z, y_dim,x_dim, img = load_img(img_path_list[file_num])
+    dim_1, dim_2, y_dim,x_dim, img = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
     img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
     fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
     p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
 
     #create new directory-path
-    for t_num in tqdm(range(0,t)):
-        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "t-%03d"%(t_num)
+    for num_1 in tqdm(range(0,dim_1)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "t-%03d"%(num_1)
         os.chdir(sub_save_location)
         folder = os.path.join(sub_save_location,folder_name)
         os.mkdir(folder)
         os.chdir(folder)
-        for z_num in range(z):
-          if (z_num % 2) == 0:
+        for num_2 in range(z):
+          if (num_2 % 2) == 0:
             #create new directory-path
-            file_name = ("z_%03d" %(z_num))
+            file_name = ("z_%03d" %(num_2))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
-            img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+            img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
             img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
             img_save_1 = convert(img_save_1, 0, 255, np.uint8)
             # # saving images as PNG
@@ -49,12 +29,12 @@ def downsample_z_creation(img_path_list, file_num, sub_save_location):
               writer1.save(img_save_1)
 
           #save the last slide on top labeled with x
-          if z_num == z-1 and (z_num % 2) != 0:
-            file_name = ("z_%03d" %(z_num))
+          if num_2 == z-1 and (num_2 % 2) != 0:
+            file_name = ("z_%03d" %(num_2))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
-            img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+            img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
             img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
             img_save_1 = convert(img_save_1, 0, 255, np.uint8)
             # # saving images as PNG
@@ -65,27 +45,27 @@ def downsample_z_creation(img_path_list, file_num, sub_save_location):
 
 def downsample_t_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
-    t, z, y_dim,x_dim, img = load_img(img_path_list[file_num])
+    dim_1, dim_2, y_dim,x_dim, img = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
     img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
     fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
     p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
 
     #create new directory-path
-    for z_num in tqdm(range(0,z)):
-        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(z_num)
+    for num_2 in tqdm(range(0,dim_2)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_2)
         os.chdir(sub_save_location)
         folder = os.path.join(sub_save_location,folder_name)
         os.mkdir(folder)
         os.chdir(folder)
-        for t_num in range(t):
-          if (t_num % 2) == 0:
+        for num_1 in range(dim_1):
+          if (num_1 % 2) == 0:
             #create new directory-path
-            file_name = ("t_%03d" %(t_num))
+            file_name = ("t_%03d" %(num_1))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
-            img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+            img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
             img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
             img_save_1 = convert(img_save_1, 0, 255, np.uint8)
             # # saving images as PNG
@@ -93,12 +73,12 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
               writer1.save(img_save_1)
 
           #save the last slide on top labeled with x
-          if t_num == t-1 and (t_num % 2) != 0:
-            file_name = ("t_%03d" %(t_num))
+          if num_1 == t-1 and (num_1 % 2) != 0:
+            file_name = ("t_%03d" %(num_1))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
-            img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+            img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
             img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
             img_save_1 = convert(img_save_1, 0, 255, np.uint8)
             # # saving images as PNG
@@ -109,26 +89,26 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
 
 def upsample_t_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
-    t, z, y_dim,x_dim, img = load_img(img_path_list[file_num])
+    dim_1, dim_2, y_dim,x_dim, img = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
     img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
     fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
     p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
     
     #create new directory-path
-    for z_num in tqdm(range(0,z)):
-        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(z_num)
+    for num_2 in tqdm(range(0,dim_2)):   # dim_2 = zdimension
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_2) # z doesn't need to be the z dimension because it is also used for the t dimension
         os.chdir(sub_save_location)
         folder = os.path.join(sub_save_location,folder_name)
         os.mkdir(folder_name)
         os.chdir(folder_name)
-        for t_num in range(t):
+        for num_1 in range(dim_1):
           #create new directory-path
-          file_name = ("t_%03d" %(t_num))
+          file_name = ("t_%03d" %(num_1))
 
           # #here put the image pngs into the folder (instead of creating the folder)
           # #convert image to unit8 otherwise warning
-          img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+          img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
           img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
           img_save_1 = convert(img_save_1, 0, 255, np.uint8)
 
@@ -139,7 +119,7 @@ def upsample_t_creation(img_path_list, file_num, sub_save_location):
 
 def upsample_z_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
-    t, z, y_dim,x_dim, img = load_img(img_path_list[file_num])
+    dim_1, dim_2, y_dim,x_dim, img = load_img(img_path_list[file_num]) #dim_1=t, dim_2=z
     # folder_steps = str(file_num) + "_steps"
     img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
     fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
@@ -148,19 +128,19 @@ def upsample_z_creation(img_path_list, file_num, sub_save_location):
     # os.mkdir(folder_file_path)
 
     #create new directory-path
-    for t_num in tqdm(range(0,t)):
-        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "t-%03d"%(t_num)
+    for num_1 in tqdm(range(0,dim_1)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_1)
         os.chdir(sub_save_location)
         folder = os.path.join(sub_save_location,folder_name)
         os.mkdir(folder_name)
         os.chdir(folder_name)
-        for z_num in range(z):
+        for num_2 in range(dim_2):
           #create new directory-path
-          file_name = ("z_%03d"%(z_num))
+          file_name = ("z_%03d"%(num_2))
 
           # #here put the image pngs into the folder (instead of creating the folder)
           # #convert image to unit8 otherwise warning
-          img_save_1 = reshape_data(img, "TZXY","XY", T=t_num, Z=z_num)
+          img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
           img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
           img_save_1 = convert(img_save_1, 0, 255, np.uint8)
 
@@ -214,6 +194,4 @@ def convert(img, target_type_min, target_type_max, target_type):
     b = target_type_max - a * imax
     new_img = (a * img + b).astype(target_type)
     return new_img
-
-
 
