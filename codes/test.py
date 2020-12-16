@@ -8,6 +8,7 @@ import os
 import os.path as osp
 import glob
 import logging
+import argparse
 import numpy as np
 import cv2
 import torch
@@ -17,6 +18,11 @@ import data.util as data_util
 import models.modules.Sakuya_arch as Sakuya_arch
 
 def main():
+    #### options
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--zoom', type=int, default=1, help='Select zoom factor of the image')
+    args = parser.parse_args()
+
     scale = 4
     N_ot = 7 #3
     N_in = 1+ N_ot // 2
@@ -171,7 +177,14 @@ def main():
                 output_f = outputs[idx,:,:,:].squeeze(0)
 
                 output = util.tensor2img(output_f)
-                if save_imgs:                
+                if save_imgs:
+                    # resize the image based on zoomfactor
+                    zoom = args.zoom
+                    print(zoom)
+                    zoomfactor = zoom/scale
+                    x,y,_ = output.shape
+                    dim = (int(x*zoomfactor),int(y*zoomfactor))   
+                    output = cv2.resize(output, dim, interpolation = cv2.INTER_NEAREST) # looks the nicest compared to the others: INTER_LINEAR, INTER_CUBIC, INTER_LANCZOS4
                     cv2.imwrite(osp.join(save_sub_folder, '{:08d}.png'.format(name_idx+1)), output)
 
                 if 'Custom' not in data_mode:
