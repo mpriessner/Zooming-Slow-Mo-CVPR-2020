@@ -180,7 +180,6 @@ def main():
                 if save_imgs:
                     # resize the image based on zoomfactor
                     zoom = args.zoom
-                    print(zoom)
                     zoomfactor = zoom/scale
                     x,y,_ = output.shape
                     dim = (int(x*zoomfactor),int(y*zoomfactor))   
