@@ -12,6 +12,8 @@ import argparse
 import numpy as np
 import cv2
 import torch
+from tqdm import tqdm
+
 
 import utils.util as util
 import data.util as data_util
@@ -101,7 +103,7 @@ def main():
     sub_folder_name_l = []
     # total_time = []
     # for each sub-folder
-    for sub_folder in sub_folder_l:
+    for sub_folder in tqdm(sub_folder_l):
         gt_tested_list = []
         sub_folder_name = sub_folder.split('/')[-1]
         sub_folder_name_l.append(sub_folder_name)
