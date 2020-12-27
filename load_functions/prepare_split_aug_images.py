@@ -86,6 +86,22 @@ def flip(source_img, name, path):
     io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
     io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
 
+    
+def correct_channels(img):
+  '''Changes the channel and timepoint channel if channel is bigger than the timepoints'''
+  channel = img.shape[2]
+  timepoint = img.shape[1]
+  # correct eventual wrong channel arrangement change t and c
+  if channel > timepoint:
+      img = img.get_image_data("STCZYX") 
+      img = reshape_data(img, "STCZYX","SCTZYX")
+  else:
+    img = img.get_image_data("STCZYX") 
+    # img = reshape_data(img, "STCZYX","STCZXY")
+
+  print(img.shape)
+  return img
+    
 #def change_axis(img):
 #    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
 #    img = np.swapaxes(img, 1, 2)
