@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args()
 
     scale = 4
-    N_ot = 7 #3
+    N_ot = 3 #7
     N_in = 1+ N_ot // 2
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
