@@ -123,7 +123,7 @@ def upsample_t_creation(img_path_list, file_num, sub_save_location):
 
           # #here put the image pngs into the folder (instead of creating the folder)
           # #convert image to unit8 otherwise warning
-          img_save_1 = reshape_data(img, "TZYX","XY", T=num_1, Z=num_2)
+          img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
           img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
           img_save_1 = convert(img_save_1, 0, 255, np.uint8)
 
@@ -155,7 +155,7 @@ def upsample_z_creation(img_path_list, file_num, sub_save_location):
 
           # #here put the image pngs into the folder (instead of creating the folder)
           # #convert image to unit8 otherwise warning
-          img_save_1 = reshape_data(img, "TZYX","XY", T=num_1, Z=num_2)
+          img_save_1 = reshape_data(img, "TZXY","XY", T=num_1, Z=num_2)
           img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
           img_save_1 = convert(img_save_1, 0, 255, np.uint8)
 
@@ -178,7 +178,7 @@ def get_img_path_list(img_path_list, img_folder_path):
 
 def load_img(img_path):
     img = AICSImage(img_path)
-    img = img.get_image_data("TZYX", S=0)  # in my case channel is the Time
+    img = img.get_image_data("TZXY", S=0)  # in my case channel is the Time
     print("The image dimensions are: " + str(img.shape))
     t, z, y_dim, x_dim = img.shape[:]
     return t, z, y_dim,x_dim, img
