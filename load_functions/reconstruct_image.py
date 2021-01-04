@@ -49,7 +49,7 @@ def save_image(temp_img, folder_option, slice_count, file_count, save_location_i
   img = AICSImage("/content/temp.tif")
   img = img.get_image_data("CSTZYX")
   if folder_option == "upsample-z" or folder_option == "downsample-z":
-    img= reshape_data(img, "CSTZYX","STCZYX")
+    img= reshape_data(img, "CSTZYX","SZTCYX")
   elif folder_option == "upsample-t" or folder_option == "downsample-t":
     img= reshape_data(img, "CSTZYX","SZTCYX")
   # io.imsave(f"/{save_location}/{name}.tif",img)
