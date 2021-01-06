@@ -51,15 +51,13 @@ def save_image(temp_img, folder_option, slice_count, file_count, save_location_i
   io.imsave("/content/temp.tif",temp_img_final)
   img = AICSImage("/content/temp.tif")
   img = img.get_image_data("CSTZYX")
-  if folder_option == "upsample-z" or folder_option == "downsample-z":
+  if folder_option == "upsample-z" or folder_option == "downsample-z" or folder_option == "zoom":
     img= reshape_data(img, "CSTZYX","SCTZYX")
     io.imsave(save_location_image+f"/{file_name}_Z.tif", img)
 
   elif folder_option == "upsample-t" or folder_option == "downsample-t":
     img= reshape_data(img, "CSTZYX","SZTCYX")
     io.imsave(save_location_image+f"/{file_name}_T.tif", img)
-  # io.imsave(f"/{save_location}/{name}.tif",img)
-
 
 def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape):
     '''this function saves the the single images of each 4D file into one h5py file'''
