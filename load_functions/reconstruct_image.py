@@ -43,21 +43,25 @@ def get_folder_list(source_path):
 #    master_dict[folder_name] =np.zeros((file_dim,xy_dim,xy_dim))
 #  return master_dict, file_dim, folder_dim, xy_dim
 
+
 def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name):
   """ This function saves the temp image and re-structures the channels in the right order for the z-dimension"""
+  
   temp_img_final = temp_img[1:,:,:,:]
   # if folder_option == "upsample-z":
   #   temp_img_final = np.swapaxes(temp_img_final, 0, 1)
   io.imsave("/content/temp.tif",temp_img_final)
   img = AICSImage("/content/temp.tif")
   img = img.get_image_data("CSTZYX")
-  if folder_option == "upsample-z" or folder_option == "downsample-z" or folder_option == "zoom":
+  
+  if folder_option == "upsample-z" or folder_option == "downsample-z":
     img= reshape_data(img, "CSTZYX","SCTZYX")
     io.imsave(save_location_image+f"/{file_name}_Z.tif", img)
 
-  elif folder_option == "upsample-t" or folder_option == "downsample-t":
+  elif folder_option == "upsample-t" or folder_option == "downsample-t" or folder_option == "zoom":
     img= reshape_data(img, "CSTZYX","SZTCYX")
     io.imsave(save_location_image+f"/{file_name}_T.tif", img)
+    
 
 def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape):
     '''this function saves the the single images of each 4D file into one h5py file'''
@@ -65,10 +69,12 @@ def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, in
     xy_dim = int(product_image_shape/multiplyer)
     h5py_safe_location_list = []
     # saving all the images in the xyz dimension in a h5py file
+    
     for image in img_list:
       h5py_safe_location = f"/content/ZoomInterpolation/results/{image}.hdf5"
       h5py_safe_location_list.append(h5py_safe_location)
       with h5py.File(h5py_safe_location, 'w') as f:
+        
         for permutation in permutation_list:
           for zt in tqdm(zt_list):
             temp_img_3D = np.zeros((len(file_nr), multiplyer*xy_dim, multiplyer*xy_dim))
