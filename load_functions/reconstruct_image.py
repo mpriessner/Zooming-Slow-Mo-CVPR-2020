@@ -26,23 +26,6 @@ def get_folder_list(source_path):
   folder_list = folder_list[1:]
   return folder_list
 
-#def create_template_dict(source_path):
-#  # get dimensions of data
-#  folder_list = get_folder_list(source_path)
-#  flist = get_file_list(folder_list[0])
-#  file_path = os.path.join(folder_list[0], flist[0])
-#  img = AICSImage(file_path)
-#  img = img.get_image_data("YX", Z=0, C=0, S=0, T=0)
-#  xy_dim = img.shape[-1]
-#  folder_dim = len(folder_list)
-#  file_dim = len(flist)
-#  #create a dictionary which contains all 3d lists of zeros for storing all the images
-#  master_dict = {}
-#  for folder_path in folder_list:
-#    folder_name = folder_path.split("/")[-1]
-#    master_dict[folder_name] =np.zeros((file_dim,xy_dim,xy_dim))
-#  return master_dict, file_dim, folder_dim, xy_dim
-
 
 def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name):
   """ This function saves the temp image and re-structures the channels in the right order for the z-dimension"""
