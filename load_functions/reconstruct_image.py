@@ -41,9 +41,13 @@ def save_image(temp_img, folder_option, slice_count, file_count, save_location_i
     img= reshape_data(img, "CSTZYX","SCTZYX")
     io.imsave(save_location_image+f"/{file_name}_Z.tif", img)
 
-  elif folder_option == "upsample-t" or folder_option == "downsample-t" or folder_option == "zoom":
+  elif folder_option == "upsample-t" or folder_option == "downsample-t" :
     img= reshape_data(img, "CSTZYX","SZTCYX")
     io.imsave(save_location_image+f"/{file_name}_T.tif", img)
+
+  elif folder_option == "zoom":
+    img= reshape_data(img, "CSTZYX","SZTCYX")
+    io.imsave(save_location_image+f"/{file_name}_zoom.tif", img)
     
 
 def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape):
