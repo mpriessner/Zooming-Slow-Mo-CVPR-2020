@@ -27,23 +27,27 @@ def get_folder_list(source_path):
   return folder_list
 
 
-def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor):
+def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim):
   """ This function saves the temp image and re-structures the channels in the right order for the z-dimension"""
   # remove the first slice of zeros
+  # print(f"save temp_img: {temp_img.shape}")
   temp_img_final = temp_img[1:,:,:,:]
   if folder_option == "upsample-z" or folder_option == "downsample-z":
+    if (tz_dim % 2) != 0:
+      temp_img_final = temp_img_final[:,:-1,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}-Z.tif", temp_img_final)
 
   elif folder_option == "upsample-t" or folder_option == "downsample-t" :
     temp_img_final = np.swapaxes(temp_img_final, 0, 1)
-    print(temp_img_final.shape)
-    temp_img_final = temp_img_final[:-1,:,:,:] # remove the last image to get the same dimensions
+    if (tz_dim % 2) == 0:
+      temp_img_final = temp_img_final[:-1,:,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}-T.tif", temp_img_final)
 
 
   elif folder_option == "zoom":
     temp_img_final = np.swapaxes(temp_img_final, 0, 1)
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}.tif", temp_img_final)
+
     
 def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape):
     '''this function saves the the single images of each 4D file into one h5py file'''
