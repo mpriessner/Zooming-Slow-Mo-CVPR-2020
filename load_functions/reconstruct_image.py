@@ -33,13 +33,13 @@ def save_image(temp_img, folder_option, slice_count, file_count, save_location_i
   # print(f"save temp_img: {temp_img.shape}")
   temp_img_final = temp_img[1:,:,:,:]
   if folder_option == "upsample-z" or folder_option == "downsample-z":
-    if (tz_dim % 2) != 0:
+    if (tz_dim % 2) != 0: # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
       temp_img_final = temp_img_final[:,:-1,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}-Z.tif", temp_img_final)
 
   elif folder_option == "upsample-t" or folder_option == "downsample-t" :
     temp_img_final = np.swapaxes(temp_img_final, 0, 1)
-    if (tz_dim % 2) == 0:
+    if (tz_dim % 2) == 0:  # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
       temp_img_final = temp_img_final[:-1,:,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}-T.tif", temp_img_final)
 
@@ -82,6 +82,5 @@ def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, in
               temp_img_3D[single_file_nr,:,:] = temp_img_2D
             name = f"{image}_{permutation}_{zt}"
             f.create_dataset(f"{name}", data=np.array(temp_img_3D, dtype=np.uint8))
-            print(temp_img_3D.shape)
 
     return h5py_safe_location_list
