@@ -15,16 +15,16 @@ datasets:
     interval_list: [1]
     random_reverse: true #false
     border_mode: false
-    dataroot_GT: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/HR/x4/GT.lmdb                ### change
-    dataroot_LQ: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/LR/x4/LRx4.lmdb              ### change
-    cache_keys: /content/gdrive/My Drive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/small_set/test4/HR/x4/GT.lmdb/meta_info.pkl   ### change
+    dataroot_GT: /content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210112_Training_network_data/output/HR/vimeo7_train_GT.lmdb                ### change
+    dataroot_LQ: /content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210112_Training_network_data/output/LR/vimeo7_train_LR7.lmdb              ### change
+    cache_keys: /content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210112_Training_network_data/output/HR/vimeo7_train_GT.lmdb/Vimeo7_train_keys.pkl   ### change
 
     N_frames: 7
     use_shuffle: true
     n_workers: 3  # per GPU
     batch_size: 16 
-    GT_size: 128 
-    LQ_size: 32
+    GT_size: 256 
+    LQ_size: 64
     use_flip: true
     use_rot: true
     color: RGB
