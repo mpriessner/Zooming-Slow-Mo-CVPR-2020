@@ -1,4 +1,5 @@
 import os
+import os.path as osp
 import sys
 sys.path.insert(0,'/content/ZoomInterpolation/codes')
 import cv2
@@ -110,3 +111,126 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir):
         cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
         cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
         cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
+
+
+###############################################################
+import os,sys
+import os.path as osp
+import glob
+import pickle
+from multiprocessing import Pool
+import numpy as np
+import lmdb
+import cv2
+from tqdm import tqdm
+sys.path.insert(0,'/content/ZoomInterpolation/codes')
+import data.util as data_util
+import utils.util as util
+
+
+def reading_image_worker(path, key):
+    '''worker for reading images'''
+    img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+    return (key, img)
+
+def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch):
+    '''create lmdb for the Vimeo90K-7 frames dataset, each image with fixed size
+    GT: [3, 256, 448]
+        Only need the 4th frame currently, e.g., 00001_0001_4
+    LR: [3, 64, 112]
+        With 1st - 7th frames, e.g., 00001_0001_1, ..., 00001_0001_7
+    key:
+        Use the folder and subfolder names, w/o the frame index, e.g., 00001_0001
+    '''
+    #### configurations
+    n_thread = 40
+
+    # define the septest/trainlist & lmdb_save_path
+    path_parent = os.path.dirname(img_folder)
+    if test_or_train == "test":
+      txt_file = os.path.join(path_parent,"sep_testlist.txt")
+      lmdb_save_path = os.path.join(path_parent, "/vimeo7_train_GT.lmdb")
+      if os.path.isdir(lmdb_save_path):
+        shutil.rmtree(lmdb_save_path)
+    if test_or_train == "train":
+      txt_file = os.path.join(path_parent,"sep_trainlist.txt")
+      lmdb_save_path = os.path.join(path_parent, "/vimeo7_train_GT.lmdb")
+      if os.path.isdir(lmdb_save_path):
+        shutil.rmtree(lmdb_save_path)
+
+    ########################################################
+    if not lmdb_save_path.endswith('.lmdb'):
+        raise ValueError("lmdb_save_path must end with \'lmdb\'.")
+    #### whether the lmdb file exist
+    if osp.exists(lmdb_save_path):
+        print('Folder [{:s}] already exists. Exit...'.format(lmdb_save_path))
+        sys.exit(1)
+
+    #### read all the image paths to a list
+    print('Reading image path list ...')
+    with open(txt_file) as f:
+        train_l = f.readlines()
+        train_l = [v.strip() for v in train_l]
+    all_img_list = []
+    keys = []
+    for line in tqdm(train_l):
+        folder = line.split('/')[0]
+        sub_folder = line.split('/')[1]
+        file_l = glob.glob(osp.join(img_folder, folder, sub_folder) + '/*')
+        all_img_list.extend(file_l)
+        for j in range(7):
+            keys.append('{}_{}_{}'.format(folder, sub_folder, j + 1))
+    all_img_list = sorted(all_img_list)
+    keys = sorted(keys)
+    print(keys)
+    # if mode == 'GT': 
+    all_img_list = [v for v in all_img_list if v.endswith('.png')]
+    keys = [v for v in keys]
+    print(keys)
+
+    print('Calculating the total size of images...')
+    data_size = sum(os.stat(v).st_size for v in all_img_list)
+
+    #### read all images to memory (multiprocessing)
+    print('Read images with multiprocessing, #thread: {} ...'.format(n_thread))
+    
+    #### create lmdb environment
+    env = lmdb.open(lmdb_save_path, map_size=data_size * 10)
+    txn = env.begin(write=True)  # txn is a Transaction object
+
+    #### write data to lmdb
+    pbar = util.ProgressBar(len(all_img_list))
+
+    i = 0
+    for path, key in tqdm(zip(all_img_list, keys)):
+        pbar.update('Write {}'.format(key))
+        img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        key_byte = key.encode('ascii')
+        H, W, C = img.shape  # fixed shape
+        assert H == H_dst and W == W_dst and C == 3, 'different shape.'
+        txn.put(key_byte, img)
+        i += 1
+        if  i % batch == 1:
+            txn.commit()
+            txn = env.begin(write=True)
+
+    txn.commit()
+    env.close()
+    print('Finish reading and writing {} images.'.format(len(all_img_list)))
+            
+    print('Finish writing lmdb.')
+
+    #### create meta information
+    meta_info = {}
+    if mode == 'GT':
+        meta_info['name'] = 'Vimeo7_train_GT'
+    elif mode == 'LR':
+        meta_info['name'] = 'Vimeo7_train_LR7'
+    meta_info['resolution'] = '{}_{}_{}'.format(3, H_dst, W_dst)
+    key_set = set()
+    for key in keys:
+        a, b, _ = key.split('_')
+        key_set.add('{}_{}'.format(a, b))
+    meta_info['keys'] = key_set
+    pickle.dump(meta_info, open(osp.join(lmdb_save_path, 'Vimeo7_train_keys.pkl'), "wb"))
+    print('Finish creating lmdb meta info.')
