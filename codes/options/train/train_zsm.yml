@@ -19,7 +19,7 @@ datasets:
     dataroot_LQ: /content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210112_Training_network_data/output/LR/vimeo7_train_LR7.lmdb              ### change
     cache_keys: /content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210112_Training_network_data/output/HR/vimeo7_train_GT.lmdb/Vimeo7_train_keys.pkl   ### change
 
-    N_frames: 7
+    N_frames: 7   # can change also to 3 see what is the difference?
     use_shuffle: true
     n_workers: 3  # per GPU
     batch_size: 16 
@@ -33,7 +33,7 @@ datasets:
 network_G:
   which_model_G: LunaTokis
   nf: 64
-  nframes: 7
+  nframes: 7   # can change also to 3 see what is the difference?
   groups: 8
   front_RBs: 5
   mid_RBs: 0
