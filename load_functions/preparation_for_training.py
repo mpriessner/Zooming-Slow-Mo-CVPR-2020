@@ -5,7 +5,23 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 from data.util import imresize_np
+import shutil
 
+
+def split_test_train_sequences_data(inPath, outPath, guide):
+  """This function splits the sequences folder into the test and train folder with the given format
+  based on the guide txt files"""
+  if os.path.isdir(outPath):
+    shutil.rmtree(outPath)
+  f = open(guide, "r")
+  lines = f.readlines()
+  for l in tqdm(lines):
+      line = l.replace('\n','')
+      this_folder = os.path.join(inPath, line)
+      dest_folder = os.path.join(outPath, line)
+      # print(this_folder)
+      shutil.copytree(this_folder, dest_folder)
+  print('Done')
 
 def prep_folder_structure(root, new_path):
   '''this function creates the same folder and subfolder structure as provided in the sequences folder in a 
