@@ -64,7 +64,7 @@ class Vimeo7Dataset(data.Dataset):
             cache_keys = 'Vimeo7_train_keys.pkl'
         logger.info('Using cache keys - {}.'.format(cache_keys))
         self.paths_GT = pickle.load(open('{}'.format(cache_keys), 'rb')) ### changed to get the full location of the keys file in
-     
+        self.paths_GT = list(self.paths_GT["keys"])  ### changed that otherwise doesn't work because it would be a dict and list is needed
         assert self.paths_GT, 'Error: GT path is empty.'
 
         if self.data_type == 'lmdb':
