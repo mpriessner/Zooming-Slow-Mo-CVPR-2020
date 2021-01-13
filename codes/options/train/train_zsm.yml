@@ -1,5 +1,5 @@
 #### general settings
-name: LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo
+name: LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo_debug
 use_tb_logger: false #true
 model: VideoSR_base
 distortion: sr
