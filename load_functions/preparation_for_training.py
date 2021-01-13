@@ -43,13 +43,34 @@ def get_all_filepaths(folder_path):
             flist.append(os.path.join(path, name))
     return flist
 
-def generate_mod_LR_bic(up_scale, sourcedir, savedir):
+def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
     # params: upscale factor, input directory, output directory
     saveHRpath = os.path.join(savedir, 'HR', 'x' + str(up_scale))
     saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
     saveBicpath = os.path.join(savedir, 'Bic', 'x' + str(up_scale))
-    print(sourcedir)
-    print(not os.path.isdir(sourcedir))
+
+    train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
+    train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
+    train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
+
+    test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
+    test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
+    test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
+
+
+    print(train_guide_HR)
+    print(train_guide_Bic)
+    print(train_guide_LR)
+    shutil.copy(train_guide, train_guide_HR)
+    shutil.copy(train_guide, train_guide_LR)
+    shutil.copy(train_guide, train_guide_Bic)
+
+    shutil.copy(test_guide, test_guide_HR)
+    shutil.copy(test_guide, test_guide_LR)
+    shutil.copy(test_guide, test_guide_Bic)
+
+    # print(sourcedir)
+    # print(not os.path.isdir(sourcedir))
     if not os.path.isdir(sourcedir):
         print('Error: No source data found')
         exit(0)
@@ -133,7 +154,7 @@ def reading_image_worker(path, key):
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     return (key, img)
 
-def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch):
+def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode):
     '''create lmdb for the Vimeo90K-7 frames dataset, each image with fixed size
     GT: [3, 256, 448]
         Only need the 4th frame currently, e.g., 00001_0001_4
@@ -149,12 +170,12 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch):
     path_parent = os.path.dirname(img_folder)
     if test_or_train == "test":
       txt_file = os.path.join(path_parent,"sep_testlist.txt")
-      lmdb_save_path = os.path.join(path_parent, "/vimeo7_train_GT.lmdb")
+      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{mode}.lmdb")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
     if test_or_train == "train":
       txt_file = os.path.join(path_parent,"sep_trainlist.txt")
-      lmdb_save_path = os.path.join(path_parent, "/vimeo7_train_GT.lmdb")
+      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{mode}.lmdb")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
 
@@ -182,11 +203,9 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch):
             keys.append('{}_{}_{}'.format(folder, sub_folder, j + 1))
     all_img_list = sorted(all_img_list)
     keys = sorted(keys)
-    print(keys)
-    # if mode == 'GT': 
-    all_img_list = [v for v in all_img_list if v.endswith('.png')]
-    keys = [v for v in keys]
-    print(keys)
+    if mode == 'GT': 
+        all_img_list = [v for v in all_img_list if v.endswith('.png')]
+        keys = [v for v in keys]
 
     print('Calculating the total size of images...')
     data_size = sum(os.stat(v).st_size for v in all_img_list)
