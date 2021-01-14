@@ -26,14 +26,22 @@ def split_test_train_sequences_data(inPath, outPath, guide):
 
 def prep_folder_structure(root, new_path):
   '''this function creates the same folder and subfolder structure as provided in the sequences folder in a 
-  new given location path'''
+  new given new_location path'''
+  file_folder_list = []
   for path, subdirs, files in os.walk(root):
       for dir in subdirs:
-        if len(dir)==5:
-          new_path_sub = os.path.join(new_path, dir)
-          os.mkdir(os.path.join(new_path, dir))
-        else:
-          os.mkdir(os.path.join(new_path_sub, dir))
+        if len(dir)==5: # filter all file folders with 5 digits
+          file_folder_list.append(dir)
+  for file_folder in file_folder_list:
+    file_folder_path = os.path.join(new_path, file_folder)   
+    os.mkdir(file_folder_path)
+    for path, subdirs, files in os.walk(root):
+      for sub_folder in subdirs:
+        if len(sub_folder)==4: # filter all sequence folders with 4 digits
+          new_path_sub = os.path.join(file_folder_path, sub_folder)
+          if not os.path.isdir(new_path_sub): # to not repeat the same folders several times
+            new_path_sub = os.path.join(file_folder_path, sub_folder)
+            os.mkdir(new_path_sub)
 
 def get_all_filepaths(folder_path):
     '''This function gets the paths from each file in folder and subfolder of a given location'''
