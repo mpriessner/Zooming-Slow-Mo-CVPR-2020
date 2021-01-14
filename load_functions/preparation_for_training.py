@@ -49,25 +49,9 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
     saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
     saveBicpath = os.path.join(savedir, 'Bic', 'x' + str(up_scale))
 
-    train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
-    train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
-    train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
-
-    test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
-    test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
-    test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
-
-
-    print(train_guide_HR)
-    print(train_guide_Bic)
-    print(train_guide_LR)
-    shutil.copy(train_guide, train_guide_HR)
-    shutil.copy(train_guide, train_guide_LR)
-    shutil.copy(train_guide, train_guide_Bic)
-
-    shutil.copy(test_guide, test_guide_HR)
-    shutil.copy(test_guide, test_guide_LR)
-    shutil.copy(test_guide, test_guide_Bic)
+    save_HR = os.path.join(savedir, 'HR')
+    save_LR = os.path.join(savedir, 'LR')
+    save_Bic = os.path.join(savedir, 'Bic')
 
     # print(sourcedir)
     # print(not os.path.isdir(sourcedir))
@@ -77,12 +61,12 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
     if not os.path.isdir(savedir):
         os.mkdir(savedir)
 
-    if not os.path.isdir(os.path.join(savedir, 'HR')):
-        os.mkdir(os.path.join(savedir, 'HR'))
-    if not os.path.isdir(os.path.join(savedir, 'LR')):
-        os.mkdir(os.path.join(savedir, 'LR'))
-    if not os.path.isdir(os.path.join(savedir, 'Bic')):
-        os.mkdir(os.path.join(savedir, 'Bic'))
+    if not os.path.isdir(save_HR):
+        os.mkdir(save_HR)
+    if not os.path.isdir(save_LR):
+        os.mkdir(save_LR)
+    if not os.path.isdir(save_Bic):
+        os.mkdir(save_Bic)
 
     if not os.path.isdir(saveHRpath):
         os.mkdir(saveHRpath)
@@ -104,6 +88,24 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
     else:
         print('It will cover ' + str(saveBicpath))
         prep_folder_structure(sourcedir, saveBicpath)
+      
+    # copy the set_guide text files in each folder (HR, LR, Bic)
+    train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
+    train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
+    train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
+
+    test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
+    test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
+    test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
+
+    shutil.copy(train_guide, train_guide_HR)
+    shutil.copy(train_guide, train_guide_LR)
+    shutil.copy(train_guide, train_guide_Bic)
+
+    shutil.copy(test_guide, test_guide_HR)
+    shutil.copy(test_guide, test_guide_LR)
+    shutil.copy(test_guide, test_guide_Bic)
+
 
     filepaths = get_all_filepaths(sourcedir)
     print(len(filepaths))
@@ -132,9 +134,9 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
         cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
         cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
         cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
+    return save_HR, save_LR, save_Bic
 
-
-###############################################################
+#############################Prepare LMBD data ##################################
 import os,sys
 import os.path as osp
 import glob
@@ -154,7 +156,7 @@ def reading_image_worker(path, key):
     img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     return (key, img)
 
-def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode):
+def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_factor):
     '''create lmdb for the Vimeo90K-7 frames dataset, each image with fixed size
     GT: [3, 256, 448]
         Only need the 4th frame currently, e.g., 00001_0001_4
@@ -170,12 +172,12 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode):
     path_parent = os.path.dirname(img_folder)
     if test_or_train == "test":
       txt_file = os.path.join(path_parent,"sep_testlist.txt")
-      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{mode}.lmdb")
+      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{scale_factor}_{mode}.lmdb")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
     if test_or_train == "train":
       txt_file = os.path.join(path_parent,"sep_trainlist.txt")
-      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{mode}.lmdb")
+      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{scale_factor}_{mode}.lmdb")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
 
@@ -203,7 +205,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode):
             keys.append('{}_{}_{}'.format(folder, sub_folder, j + 1))
     all_img_list = sorted(all_img_list)
     keys = sorted(keys)
-    if mode == 'GT': 
+    if mode == 'HR': 
         all_img_list = [v for v in all_img_list if v.endswith('.png')]
         keys = [v for v in keys]
 
@@ -241,7 +243,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode):
 
     #### create meta information
     meta_info = {}
-    if mode == 'GT':
+    if mode == 'HR':
         meta_info['name'] = 'Vimeo7_train_GT'
     elif mode == 'LR':
         meta_info['name'] = 'Vimeo7_train_LR7'
