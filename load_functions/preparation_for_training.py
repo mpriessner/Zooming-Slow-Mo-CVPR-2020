@@ -170,9 +170,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
 
     # define the septest/trainlist & lmdb_save_path
     # path_parent = os.path.dirname(img_folder)
-    print(img_folder)
-    print(test_or_train)
-    print(os.path.join(img_folder, f"test_{scale_factor}"))
+
     if test_or_train == "test":
       txt_file = os.path.join(img_folder,"sep_testlist.txt")
       lmdb_save_path = os.path.join(img_folder, f"vimeo7_{test_or_train}_x{scale_factor}_{mode}.lmdb")
