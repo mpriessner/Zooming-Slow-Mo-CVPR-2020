@@ -169,15 +169,20 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     n_thread = 40
 
     # define the septest/trainlist & lmdb_save_path
-    path_parent = os.path.dirname(img_folder)
+    # path_parent = os.path.dirname(img_folder)
+    print(img_folder)
+    print(test_or_train)
+    print(os.path.join(img_folder, f"test_{scale_factor}"))
     if test_or_train == "test":
-      txt_file = os.path.join(path_parent,"sep_testlist.txt")
-      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{scale_factor}_{mode}.lmdb")
+      txt_file = os.path.join(img_folder,"sep_testlist.txt")
+      lmdb_save_path = os.path.join(img_folder, f"vimeo7_{test_or_train}_x{scale_factor}_{mode}.lmdb")
+      img_folder_selected = os.path.join(img_folder, f"test_{scale_factor}")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
     if test_or_train == "train":
-      txt_file = os.path.join(path_parent,"sep_trainlist.txt")
-      lmdb_save_path = os.path.join(path_parent, f"vimeo7_{test_or_train}_{scale_factor}_{mode}.lmdb")
+      txt_file = os.path.join(img_folder,"sep_trainlist.txt")
+      lmdb_save_path = os.path.join(img_folder, f"vimeo7_{test_or_train}_x{scale_factor}_{mode}.lmdb")
+      img_folder_selected = os.path.join(img_folder, f"train_{scale_factor}")
       if os.path.isdir(lmdb_save_path):
         shutil.rmtree(lmdb_save_path)
 
@@ -199,7 +204,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     for line in tqdm(train_l):
         folder = line.split('/')[0]
         sub_folder = line.split('/')[1]
-        file_l = glob.glob(osp.join(img_folder, folder, sub_folder) + '/*')
+        file_l = glob.glob(osp.join(img_folder_selected, folder, sub_folder) + '/*')
         all_img_list.extend(file_l)
         for j in range(7):
             keys.append('{}_{}_{}'.format(folder, sub_folder, j + 1))
