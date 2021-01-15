@@ -69,3 +69,35 @@ def get_full_file_paths(folder):
           file_path = os.path.join(root, file)
           list_files.append(file_path)
   return list_files
+
+
+def create_shift_image(img, y_shift, x_shift):
+  """this function shifts a 2D image with a given shift to x and y dimension - used to find the shift introduced by the network (to correct it manually)"""
+  if x_shift<0:
+    line = img[:,-1:]
+    for i in range(0, x_shift, -1):
+      img = np.concatenate((img,line), axis = 1) #right
+    img = img[:,abs(x_shift):] 
+
+  if x_shift>0:
+    line = img[:,:1]
+    for i in range(0, x_shift):
+        img = np.concatenate((line, img), axis = 1) #left
+    img = img[:,:x_dim] 
+
+  if y_shift<0:
+    line = img[-1:,:]
+    for i in range(0, y_shift, -1):
+      img = np.concatenate((img,line), axis = 0) #bottom
+    img = img[abs(y_shift):]
+    
+
+  if y_shift>0:
+    line = img[:1,:]
+    for i in range(0, y_shift):
+      img = np.concatenate((line, img), axis = 0) #top
+    img = img[:y_dim,:]  
+  return img
+
+
+
