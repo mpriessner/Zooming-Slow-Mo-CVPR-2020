@@ -39,7 +39,7 @@ def get_all_filepaths(folder_path):
             flist.append(os.path.join(path, name))
     return flist
 
-def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
+def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading):
     # params: upscale factor, input directory, output directory
     saveHRpath = os.path.join(savedir, 'HR', 'x' + str(up_scale))
     saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
@@ -51,56 +51,61 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
 
     # print(sourcedir)
     # print(not os.path.isdir(sourcedir))
-    if not os.path.isdir(sourcedir):
-        print('Error: No source data found')
-        exit(0)
-    if not os.path.isdir(savedir):
-        os.mkdir(savedir)
+    if continue_loading == False:
+        if os.path.isdir(savedir):
+          shutil.rmtree(savedir)
+          os.mkdir(savedir)
+        print("Restart loading")
+        if not os.path.isdir(sourcedir):
+            print('Error: No source data found')
+            exit(0)
+        if not os.path.isdir(savedir):
+            os.mkdir(savedir)
 
-    if not os.path.isdir(save_HR):
-        os.mkdir(save_HR)
-    if not os.path.isdir(save_LR):
-        os.mkdir(save_LR)
-    if not os.path.isdir(save_Bic):
-        os.mkdir(save_Bic)
+        if not os.path.isdir(save_HR):
+            os.mkdir(save_HR)
+        if not os.path.isdir(save_LR):
+            os.mkdir(save_LR)
+        if not os.path.isdir(save_Bic):
+            os.mkdir(save_Bic)
 
-    if not os.path.isdir(saveHRpath):
-        os.mkdir(saveHRpath)
-        prep_folder_structure(sourcedir, saveHRpath)
-    else:
-        print('It will cover ' + str(saveHRpath))
-        prep_folder_structure(sourcedir, saveHRpath)
+        if not os.path.isdir(saveHRpath):
+            os.mkdir(saveHRpath)
+            prep_folder_structure(sourcedir, saveHRpath)
+        else:
+            print('It will cover ' + str(saveHRpath))
+            prep_folder_structure(sourcedir, saveHRpath)
 
-    if not os.path.isdir(saveLRpath):
-        os.mkdir(saveLRpath)
-        prep_folder_structure(sourcedir, saveLRpath)
-    else:
-        print('It will cover ' + str(saveLRpath))
-        prep_folder_structure(sourcedir, saveLRpath)
+        if not os.path.isdir(saveLRpath):
+            os.mkdir(saveLRpath)
+            prep_folder_structure(sourcedir, saveLRpath)
+        else:
+            print('It will cover ' + str(saveLRpath))
+            prep_folder_structure(sourcedir, saveLRpath)
 
-    if not os.path.isdir(saveBicpath):
-        os.mkdir(saveBicpath)
-        prep_folder_structure(sourcedir, saveBicpath)
-    else:
-        print('It will cover ' + str(saveBicpath))
-        prep_folder_structure(sourcedir, saveBicpath)
+        if not os.path.isdir(saveBicpath):
+            os.mkdir(saveBicpath)
+            prep_folder_structure(sourcedir, saveBicpath)
+        else:
+            print('It will cover ' + str(saveBicpath))
+            prep_folder_structure(sourcedir, saveBicpath)
       
-    # copy the set_guide text files in each folder (HR, LR, Bic)
-    train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
-    train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
-    train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
+        # copy the set_guide text files in each folder (HR, LR, Bic)
+        train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
+        train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
+        train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
 
-    test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
-    test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
-    test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
+        test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
+        test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
+        test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
 
-    shutil.copy(train_guide, train_guide_HR)
-    shutil.copy(train_guide, train_guide_LR)
-    shutil.copy(train_guide, train_guide_Bic)
+        shutil.copy(train_guide, train_guide_HR)
+        shutil.copy(train_guide, train_guide_LR)
+        shutil.copy(train_guide, train_guide_Bic)
 
-    shutil.copy(test_guide, test_guide_HR)
-    shutil.copy(test_guide, test_guide_LR)
-    shutil.copy(test_guide, test_guide_Bic)
+        shutil.copy(test_guide, test_guide_HR)
+        shutil.copy(test_guide, test_guide_LR)
+        shutil.copy(test_guide, test_guide_Bic)
 
 
     filepaths = get_all_filepaths(sourcedir)
@@ -111,25 +116,31 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide):
     # # prepare data with augementation
     for i in tqdm(range(num_files)):
         filename = filepaths[i]
-        print('No.{} -- Processing {}'.format(i, filename))
-        # read image
-        image = cv2.imread(filename)
-
-        width = int(np.floor(image.shape[1] / up_scale))
-        height = int(np.floor(image.shape[0] / up_scale))
-        # modcrop
-        if len(image.shape) == 3:
-            image_HR = image[0:up_scale * height, 0:up_scale * width, :]
-        else:
-            image_HR = image[0:up_scale * height, 0:up_scale * width]
-        # LR
-        image_LR = imresize_np(image_HR, 1 / up_scale, True)
-        # bic
-        image_Bic = imresize_np(image_LR, up_scale, True)
         file_folder_path = filename[-18:]
-        cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
-        cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
-        cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
+        # check if file was already processed
+        file_checker_path = os.path.join(saveHRpath, file_folder_path)
+        if os.path.exists(file_checker_path):
+          print(f"File already exists: {file_checker_path}")
+        else: 
+          print('No.{} -- Processing {}'.format(i, filename))
+          # read image
+          image = cv2.imread(filename)
+
+          width = int(np.floor(image.shape[1] / up_scale))
+          height = int(np.floor(image.shape[0] / up_scale))
+          # modcrop
+          if len(image.shape) == 3:
+              image_HR = image[0:up_scale * height, 0:up_scale * width, :]
+          else:
+              image_HR = image[0:up_scale * height, 0:up_scale * width]
+          # LR
+          image_LR = imresize_np(image_HR, 1 / up_scale, True)
+          # bic
+          image_Bic = imresize_np(image_LR, up_scale, True)
+          file_folder_path = filename[-18:]
+          cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
+          cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
+          cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
     return save_HR, save_LR, save_Bic
 
 #############################Prepare LMBD data ##################################
