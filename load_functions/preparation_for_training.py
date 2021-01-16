@@ -21,7 +21,10 @@ def split_test_train_sequences_data(inPath, outPath, guide):
       this_folder = os.path.join(inPath, line)
       dest_folder = os.path.join(outPath, line)
       # print(this_folder)
-      shutil.move(this_folder, dest_folder)
+      if os.path.exists(dest_folder):
+        print(f"Folder already moved: {dest_folder}")
+      else:
+        shutil.move(this_folder, dest_folder)
   print('Done')
 
 def prep_folder_structure(root, new_path):
