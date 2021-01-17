@@ -42,15 +42,19 @@ def get_all_filepaths(folder_path):
             flist.append(os.path.join(path, name))
     return flist
 
+
 def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading):
     # params: upscale factor, input directory, output directory
+    if not os.path.exists(savedir):
+      os.mkdir(savedir)
+
     saveHRpath = os.path.join(savedir, 'HR', 'x' + str(up_scale))
     saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
-    saveBicpath = os.path.join(savedir, 'Bic', 'x' + str(up_scale))
+    # saveBicpath = os.path.join(savedir, 'Bic', 'x' + str(up_scale))
 
     save_HR = os.path.join(savedir, 'HR')
     save_LR = os.path.join(savedir, 'LR')
-    save_Bic = os.path.join(savedir, 'Bic')
+    # save_Bic = os.path.join(savedir, 'Bic')
 
     # print(sourcedir)
     # print(not os.path.isdir(sourcedir))
@@ -69,8 +73,8 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
             os.mkdir(save_HR)
         if not os.path.isdir(save_LR):
             os.mkdir(save_LR)
-        if not os.path.isdir(save_Bic):
-            os.mkdir(save_Bic)
+        # if not os.path.isdir(save_Bic):
+        #     os.mkdir(save_Bic)
 
         if not os.path.isdir(saveHRpath):
             os.mkdir(saveHRpath)
@@ -86,29 +90,29 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
             print('It will cover ' + str(saveLRpath))
             prep_folder_structure(sourcedir, saveLRpath)
 
-        if not os.path.isdir(saveBicpath):
-            os.mkdir(saveBicpath)
-            prep_folder_structure(sourcedir, saveBicpath)
-        else:
-            print('It will cover ' + str(saveBicpath))
-            prep_folder_structure(sourcedir, saveBicpath)
+        # if not os.path.isdir(saveBicpath):
+        #     os.mkdir(saveBicpath)
+        #     prep_folder_structure(sourcedir, saveBicpath)
+        # else:
+        #     print('It will cover ' + str(saveBicpath))
+        #     prep_folder_structure(sourcedir, saveBicpath)
       
         # copy the set_guide text files in each folder (HR, LR, Bic)
         train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
         train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
-        train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
+        # train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
 
         test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
         test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
-        test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
+        # test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
 
         shutil.copy(train_guide, train_guide_HR)
         shutil.copy(train_guide, train_guide_LR)
-        shutil.copy(train_guide, train_guide_Bic)
+        # shutil.copy(train_guide, train_guide_Bic)
 
         shutil.copy(test_guide, test_guide_HR)
         shutil.copy(test_guide, test_guide_LR)
-        shutil.copy(test_guide, test_guide_Bic)
+        # shutil.copy(test_guide, test_guide_Bic)
 
 
     filepaths = get_all_filepaths(sourcedir)
@@ -139,13 +143,13 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
               image_HR = image[0:up_scale * height, 0:up_scale * width]
           # LR
           image_LR = imresize_np(image_HR, 1 / up_scale, True)
-          # bic
-          image_Bic = imresize_np(image_LR, up_scale, True)
+          # # bic
+          # image_Bic = imresize_np(image_LR, up_scale, True)
           file_folder_path = filename[-18:]
           cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
           cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
-          cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
-    return save_HR, save_LR, save_Bic
+          # cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
+    return save_HR, save_LR, #save_Bic
 
 #############################Prepare LMBD data ##################################
 import os,sys
