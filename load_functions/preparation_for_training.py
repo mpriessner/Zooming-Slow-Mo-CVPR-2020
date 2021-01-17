@@ -124,6 +124,7 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
         file_checker_path = os.path.join(saveHRpath, file_folder_path)
         if os.path.exists(file_checker_path):
 #           print(f"File already exists: {file_checker_path}")
+            continue
         else: 
 #           print('No.{} -- Processing {}'.format(i, filename))
           # read image
