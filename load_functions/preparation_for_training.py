@@ -234,11 +234,11 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     txn = env.begin(write=True)  # txn is a Transaction object
 
     #### write data to lmdb
-    pbar = util.ProgressBar(len(all_img_list))
+    #pbar = util.ProgressBar(len(all_img_list))
 
     i = 0
     for path, key in tqdm(zip(all_img_list, keys)):
-        pbar.update('Write {}'.format(key))
+        #pbar.update('Write {}'.format(key))
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         key_byte = key.encode('ascii')
         H, W, C = img.shape  # fixed shape
