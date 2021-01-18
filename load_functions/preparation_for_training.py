@@ -66,8 +66,6 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
         if not os.path.isdir(sourcedir):
             print('Error: No source data found')
             exit(0)
-        if not os.path.isdir(savedir):
-            os.mkdir(savedir)
 
         if not os.path.isdir(save_HR):
             os.mkdir(save_HR)
@@ -77,18 +75,18 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
         #     os.mkdir(save_Bic)
 
         if not os.path.isdir(saveHRpath):
-            os.mkdir(saveHRpath)
-            prep_folder_structure(sourcedir, saveHRpath)
-        else:
+            # os.mkdir(saveHRpath)
             print('It will cover ' + str(saveHRpath))
             prep_folder_structure(sourcedir, saveHRpath)
+        # else:
+        #     prep_folder_structure(sourcedir, saveHRpath)
 
         if not os.path.isdir(saveLRpath):
-            os.mkdir(saveLRpath)
-            prep_folder_structure(sourcedir, saveLRpath)
-        else:
             print('It will cover ' + str(saveLRpath))
+            # os.mkdir(saveLRpath)
             prep_folder_structure(sourcedir, saveLRpath)
+        # else:
+        #     prep_folder_structure(sourcedir, saveLRpath)
 
         # if not os.path.isdir(saveBicpath):
         #     os.mkdir(saveBicpath)
