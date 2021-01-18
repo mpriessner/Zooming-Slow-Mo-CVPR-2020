@@ -20,102 +20,106 @@ def split_test_train_sequences_data(inPath, outPath, guide):
       line = l.replace('\n','')
       this_folder = os.path.join(inPath, line)
       dest_folder = os.path.join(outPath, line)
-      # print(this_folder)
       if os.path.exists(dest_folder):
         print(f"Folder already moved: {dest_folder}")
       else:
         shutil.move(this_folder, dest_folder)
   print('Done')
 
-def prep_folder_structure(root, new_path):
+def prep_folder_structure(new_path):
   '''this function creates the same folder and subfolder structure as provided in the sequences folder in a 
-  new given new_location path'''
-  def ig_f(dir, flist):
-    return [f for f in flist if os.path.isfile(os.path.join(dir, f))]
-  shutil.copytree(root, new_path, ignore=ig_f)
+  new given new_location path based on a master_sep_guide.txt file which recombined all folders from test and train'''
+  print(f"Prepare Folder structure: {new_path}")
+  with open("/content/master_sep_guide.txt", "r") as temp:
+    for line in tqdm(temp):
+        one = line[:-1].split("/")[0]
+        two = line[:-1].split("/")[1]
+        folder_1 = os.path.join(new_path, one)
+        if not os.path.exists(folder_1):
+          os.mkdir(folder_1)
+          folder_2 = os.path.join(folder_1, two)
+          os.mkdir(folder_2)
+        else:
+          folder_2 = os.path.join(folder_1, two)
+          os.mkdir(folder_2)
 
-def get_all_filepaths(folder_path):
-    '''This function gets the paths from each file in folder and subfolder of a given location'''
+def get_all_filepaths(input_path, N_frames):
+    '''This function gets the paths based on the folder and the N_frames provided'''
+    print("Execute: get_all_filepaths")
     flist = []
-    for path, subdirs, files in tqdm(os.walk(folder_path)):
-          for name in files:
-            flist.append(os.path.join(path, name))
+    with open("/content/master_sep_guide.txt", "r") as temp:
+      for line in tqdm(temp):
+        folder_path = os.path.join(input_path,line[:-1])
+        for i in range(1,N_frames+1):
+          file_name = f"im{i}.png"
+          file_path = os.path.join(folder_path, file_name)
+          flist.append(file_path)
     return flist
 
+def create_folder_list_from_txt_guide(testlist_txt, trainlist_txt):
+    print("Execute: create_folder_list_from_txt_guide")
+    list_path_list = []
+    with open(testlist_txt, "r") as f:
+      for line in f:
+        list_path_list.append(line)
+    with open(trainlist_txt, "r") as f:
+      for line in f:
+        list_path_list.append(line)
+    list_path_list.sort()
 
-def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading):
-    # params: upscale factor, input directory, output directory
-    if not os.path.exists(savedir):
-      os.mkdir(savedir)
+    with open("/content/master_sep_guide.txt", "w") as temp:
+      for line in list_path_list:
+        temp.write(line)
 
-    saveHRpath = os.path.join(savedir, 'HR', 'x' + str(up_scale))
-    saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
-    # saveBicpath = os.path.join(savedir, 'Bic', 'x' + str(up_scale))
+
+def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames):
+    """This function generates the high and low resulution images in a given output folder"""
+
+    create_folder_list_from_txt_guide(train_guide, test_guide)
 
     save_HR = os.path.join(savedir, 'HR')
     save_LR = os.path.join(savedir, 'LR')
-    # save_Bic = os.path.join(savedir, 'Bic')
+ 
+    saveHRpath = os.path.join(savedir, 'HR', 'x' + str(up_scale))
+    saveLRpath = os.path.join(savedir, 'LR', 'x' + str(up_scale))
 
-    # print(sourcedir)
-    # print(not os.path.isdir(sourcedir))
+    if not os.path.isdir(sourcedir):
+        print('Error: No source data found')
+        exit(0)
+      
+    # Create folder system
     if continue_loading == False:
+        print("Restart loading")
         if os.path.isdir(savedir):
           shutil.rmtree(savedir)
           os.mkdir(savedir)
-        print("Restart loading")
-        if not os.path.isdir(sourcedir):
-            print('Error: No source data found')
-            exit(0)
+        else:
+          os.mkdir(savedir)
 
-        if not os.path.isdir(save_HR):
-            os.mkdir(save_HR)
-        if not os.path.isdir(save_LR):
-            os.mkdir(save_LR)
-        # if not os.path.isdir(save_Bic):
-        #     os.mkdir(save_Bic)
+        os.mkdir(save_HR)
+        os.mkdir(save_LR)
+        
+        os.mkdir(saveHRpath)
+        prep_folder_structure(saveHRpath)
 
-        if not os.path.isdir(saveHRpath):
-            # os.mkdir(saveHRpath)
-            print('It will cover ' + str(saveHRpath))
-            prep_folder_structure(sourcedir, saveHRpath)
-        # else:
-        #     prep_folder_structure(sourcedir, saveHRpath)
+        os.mkdir(saveLRpath)
+        prep_folder_structure(saveLRpath)
 
-        if not os.path.isdir(saveLRpath):
-            print('It will cover ' + str(saveLRpath))
-            # os.mkdir(saveLRpath)
-            prep_folder_structure(sourcedir, saveLRpath)
-        # else:
-        #     prep_folder_structure(sourcedir, saveLRpath)
-
-        # if not os.path.isdir(saveBicpath):
-        #     os.mkdir(saveBicpath)
-        #     prep_folder_structure(sourcedir, saveBicpath)
-        # else:
-        #     print('It will cover ' + str(saveBicpath))
-        #     prep_folder_structure(sourcedir, saveBicpath)
-      
-        # copy the set_guide text files in each folder (HR, LR, Bic)
+        # copy the set_guide text files in each folder (HR, LR)
         train_guide_HR = saveHRpath[:-3]+"/sep_trainlist.txt"
         train_guide_LR = saveLRpath[:-3]+"/sep_trainlist.txt"
-        # train_guide_Bic = saveBicpath[:-3]+"/sep_trainlist.txt"
 
         test_guide_HR = saveHRpath[:-3]+"/sep_testlist.txt"
         test_guide_LR = saveLRpath[:-3]+"/sep_testlist.txt"
-        # test_guide_Bic = saveBicpath[:-3]+"/sep_testlist.txt"
 
         shutil.copy(train_guide, train_guide_HR)
         shutil.copy(train_guide, train_guide_LR)
-        # shutil.copy(train_guide, train_guide_Bic)
 
         shutil.copy(test_guide, test_guide_HR)
         shutil.copy(test_guide, test_guide_LR)
-        # shutil.copy(test_guide, test_guide_Bic)
 
-
-    filepaths = get_all_filepaths(sourcedir)
-    print(len(filepaths))
-    # filepaths = [f for f in os.listdir(sourcedir) if f.endswith('.png')]
+    filepaths = get_all_filepaths(sourcedir, N_frames)
+    print(f"number of files: {len(filepaths)}")
     num_files = len(filepaths)
 
     # # prepare data with augementation
@@ -141,13 +145,10 @@ def generate_mod_LR_bic(up_scale, sourcedir, savedir, train_guide, test_guide, c
               image_HR = image[0:up_scale * height, 0:up_scale * width]
           # LR
           image_LR = imresize_np(image_HR, 1 / up_scale, True)
-          # # bic
-          # image_Bic = imresize_np(image_LR, up_scale, True)
           file_folder_path = filename[-18:]
           cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
           cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
-          # cv2.imwrite(os.path.join(saveBicpath, file_folder_path), image_Bic)
-    return save_HR, save_LR, #save_Bic
+    return save_HR, save_LR
 
 #############################Prepare LMBD data ##################################
 import os,sys
