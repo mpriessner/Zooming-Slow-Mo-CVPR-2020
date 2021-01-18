@@ -56,6 +56,14 @@ def get_all_filepaths(input_path, N_frames):
           flist.append(file_path)
     return flist
 
+def get_all_filepaths_in_folder(folder_path):
+    '''This function gets the paths from each file in folder and subfolder of a given location'''
+    flist = []
+    for path, subdirs, files in tqdm(os.walk(folder_path)):
+          for name in files:
+            flist.append(os.path.join(path, name))
+    return flist
+
 def create_folder_list_from_txt_guide(testlist_txt, trainlist_txt):
     print("Execute: create_folder_list_from_txt_guide")
     list_path_list = []
