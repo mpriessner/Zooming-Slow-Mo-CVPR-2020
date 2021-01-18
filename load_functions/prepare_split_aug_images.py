@@ -1,120 +1,240 @@
-#prepare_split_aug_images.py
-#UPDATED CHECK
+#WORKING
+import os
 from skimage import io
 import numpy as np
 from tqdm import tqdm
 import shutil
-import os
 from aicsimageio import AICSImage, imread
-import shutil
 import time
-import numpy
 import random
 from aicsimageio import AICSImage, imread
 from aicsimageio.writers import png_writer 
-from tqdm import tqdm
-from google.colab.patches import cv2_imshow
 from aicsimageio.writers.ome_tiff_writer import OmeTiffWriter
-from tqdm import tqdm
 from timeit import default_timer as timer
 import imageio
 import tifffile 
 from aicsimageio.transforms import reshape_data
 from datetime import datetime
 
+def downsample_z_creation(img_path_list, file_num, sub_save_location):
+    os.chdir(sub_save_location)
+    t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
+    # folder_steps = str(file_num) + "_steps"
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
+    p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    #create new directory-path
+    for num_t in tqdm(range(0,t)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "t-%03d"%(num_t)
+        os.chdir(sub_save_location)
+        folder = os.path.join(sub_save_location,folder_name)
+        os.mkdir(folder)
+        os.chdir(folder)
+        for num_z in range(z):
+          if (num_z % 2) == 0:
+            #create new directory-path
+            file_name = ("z_%03d" %(num_z))
+
+            # #here put the image pngs into the folder (instead of creating the folder)
+            # #convert image to unit8 otherwise warning
+            if use_RGB == False:
+              img_save_1 = img[num_t,num_z, :, :] 
+              img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            elif use_RGB == True:
+              img_save_1 = img[num_t,num_z, :, :, :] 
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+              # # saving images as PNG
+              io.imsave("{}.png".format(file_name), img_save_1)
+              # writer1.save(img_save_1)
+
+          #save the last slide on top labeled with x
+          if num_z == z-1 and (num_z % 2) != 0:
+            file_name = ("z_%03d" %(num_z))
+
+            # #here put the image pngs into the folder (instead of creating the folder)
+            # #convert image to unit8 otherwise warning 
+            if use_RGB == False:
+              img_save_1 = img[num_t,num_z, :, :] 
+              img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            elif use_RGB == True:
+              img_save_1 = img[num_t,num_z, :, :, :] 
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)              
+            # # saving images as PNG
+            io.imsave("{}-x.png".format(file_name), img_save_1)
 
 
+def downsample_t_creation(img_path_list, file_num, sub_save_location):
+    os.chdir(sub_save_location)
+    t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
+    # folder_steps = str(file_num) + "_steps"
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
+    p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
+
+    #create new directory-path
+    for num_z in tqdm(range(0,z)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_z)
+        os.chdir(sub_save_location)
+        folder = os.path.join(sub_save_location,folder_name)
+        os.mkdir(folder)
+        os.chdir(folder)
+        for num_t in range(t):
+          if (num_t % 2) == 0:
+            #create new directory-path
+            file_name = ("t_%03d" %(num_t))
+
+            # #here put the image pngs into the folder (instead of creating the folder)
+            # #convert image to unit8 otherwise warning
+            if use_RGB == False:
+              img_save_1 = img[num_t,num_z, :, :] 
+              img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            elif use_RGB == True:
+              img_save_1 = img[num_t,num_z, :, :, :] 
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+              # # saving images as PNG
+            io.imsave("{}.png".format(file_name), img_save_1)
+
+          #save the last slide on top labeled with x
+          if num_t == t-1 and (num_t % 2) != 0:
+            file_name = ("t_%03d" %(num_t))
+
+            if use_RGB == False:
+              # #here put the image pngs into the folder (instead of creating the folder)
+              # #convert image to unit8 otherwise warning
+              img_save_1 = img[num_t,num_z, :, :] 
+              img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            elif use_RGB == True:
+              img_save_1 = img[num_t,num_z, :, :, :] 
+              img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+              # # saving images as PNG
+            io.imsave("{}-x.png".format(file_name), img_save_1)
+
+            
+def upsample_t_creation(img_path_list, file_num, sub_save_location):
+    os.chdir(sub_save_location)
+    t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
+    # folder_steps = str(file_num) + "_steps"
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
+    p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
+    
+    #create new directory-path
+    for num_z in tqdm(range(0,z)):   # dim_2 = zdimension
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_z) # z doesn't need to be the z dimension because it is also used for the t dimension
+        os.chdir(sub_save_location)
+        folder = os.path.join(sub_save_location,folder_name)
+        os.mkdir(folder_name)
+        os.chdir(folder_name)
+        for num_t in range(t):
+          #create new directory-path
+          file_name = ("t_%03d" %(num_t))
+
+          # #here put the image pngs into the folder (instead of creating the folder)
+          # #convert image to unit8 otherwise warning
+
+          if use_RGB == False:
+            img_save_1 = img[num_t,num_z, :, :] 
+            img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+            img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+          elif use_RGB == True:
+            img_save_1 = img[num_t,num_z, :, :, :] 
+            img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            # # saving images as PNG
+          io.imsave("{}.png".format(file_name), img_save_1)
+            # writer1.save(img_save_1)
+
+
+
+def upsample_z_creation(img_path_list, file_num, sub_save_location):
+    os.chdir(sub_save_location)
+    t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num]) #dim_1=t, dim_2=z
+    # folder_steps = str(file_num) + "_steps"
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
+    p_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[3][:2]
+    # folder_file_path = os.path.join(sub_save_location,file_to_folder_name)
+    # os.mkdir(folder_file_path)
+
+    #create new directory-path
+    for num_t in tqdm(range(0,t)):
+        folder_name = "i-{}_".format(img_nr) + "f-{}_".format(fr_nr) + "p-{}_".format(p_nr) + "z-%03d"%(num_t)
+        os.chdir(sub_save_location)
+        folder = os.path.join(sub_save_location,folder_name)
+        os.mkdir(folder_name)
+        os.chdir(folder_name)
+        for num_z in range(z):
+          #create new directory-path
+          file_name = ("z_%03d"%(num_z))
+          # #convert image to unit8 otherwise warning
+
+          if use_RGB == False:
+            img_save_1 = img[num_t,num_z, :, :] 
+            img_save_1 = create_3D_image(img_save_1, x_dim, y_dim)
+            img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+          elif use_RGB == True:
+            img_save_1 = img[num_t,num_z, :, :, :] 
+            img_save_1 = convert(img_save_1, 0, 255, np.uint8)
+            # # saving images as PNG
+          io.imsave("{}.png".format(file_name), img_save_1)
+
+            
+def get_img_path_list(img_path_list, img_folder_path):
+  ''' Creates a list of image-path that will be used for loading the images later'''
+  flist = os.listdir(img_folder_path)
+  flist.sort()
+  for i in flist:
+    img_slice_path = os.path.join(img_folder_path, i)
+    img_path_list.append(img_slice_path)
+  return img_path_list
+# img_path_list = get_img_path_list_T(img_path_list, filepath, folder_list)
+# img_path_list
+
+
+def load_img(img_path):
+    img = io.imread(img_path)
+    if img.shape[-1]==3:
+      use_RGB = True
+      t, z, y_dim, x_dim, _ = img.shape 
+      print("This image will be processed as a RGB image")
+    else:
+      use_RGB = False
+      t, z, y_dim, x_dim = img.shape 
+    print("The image dimensions are: " + str(img.shape))
+    return t, z, y_dim,x_dim, img, use_RGB
+  
+    
 def make_folder_with_date(save_location, name):
   today = datetime.now()
   if today.hour < 12:
     h = "00"
   else:
     h = "12"
-  sub_save_location = save_location + "/" + today.strftime('%Y%m%d%H')+ "_"+ today.strftime('%H%M%S')+ "_%s"%name
+  sub_save_location = save_location + "/" + today.strftime('%Y%m%d')+ "_"+ today.strftime('%H%M%S')+ "_%s"%name
   os.mkdir(sub_save_location)
   return sub_save_location
 
 
-def diplay_img_info(img, divisor):
-  ### display image data
-    image_resolution = img.shape[-1]
-    nr_z_slices = img.shape[3]
-    nr_channels = img.shape[2]
-    nr_timepoints = img.shape[1]
-    x_dim = img.shape[-1]
-    y_dim = img.shape[-2] 
-    x_div = x_dim//divisor
-    y_div = y_dim//divisor
-    print(img.shape)
-    print("The Resolution is: " + str(image_resolution))
-    print("The number of z-slizes is: " + str(nr_z_slices))
-    print("The number of timepoints: " + str(nr_timepoints))
-    print("The number of channels: " + str(nr_channels))
-    return nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div 
+def create_3D_image(img, x_dim, y_dim):
+# creates 3D image with 3 times the same values for RGB because the NN was generated for normal rgb images dim(3,x,y)
+  # print(img.shape)
+  image_3D = np.zeros((3,x_dim,y_dim))
+  image_3D[0] = img
+  image_3D[1] = img
+  image_3D[2] = img
+  return image_3D
 
 
-def rotation_aug(source_img, name, path, flip=False):
-    print(source_img.shape)
-    # Source Rotation
-    source_img_90 = np.rot90(source_img,axes=(4,5))
-    source_img_180 = np.rot90(source_img_90,axes=(4,5))
-    source_img_270 = np.rot90(source_img_180,axes=(4,5))
-    # Add a flip to the rotation
-    if flip == True:
-      source_img_lr = np.fliplr(source_img)
-      source_img_90_lr = np.fliplr(source_img_90)
-      source_img_180_lr = np.fliplr(source_img_180)
-      source_img_270_lr = np.fliplr(source_img_270)
+def convert(img, target_type_min, target_type_max, target_type):
+  # this function converts images from float32 to unit8 
+    imin = img.min()
+    imax = img.max()
+    a = (target_type_max - target_type_min) / (imax - imin)
+    b = target_type_max - a * imax
+    new_img = (a * img + b).astype(target_type)
+    return new_img
 
-      #source_img_90_ud = np.flipud(source_img_90)
-    # Save the augmented files
-    # Source images
-    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_permutation-01.tif".format(name),source_img_90)
-    io.imsave(path + "/"+"{}_permutation-02.tif".format(name),source_img_180)
-    io.imsave(path + "/"+"{}_permutation-03.tif".format(name),source_img_270)
-    # Target images
-   
-    if flip == True:
-      io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
-      io.imsave(path + "/"+"{}_permutation-05.tif".format(name),source_img_90_lr)
-      io.imsave(path + "/"+"{}_permutation-06.tif".format(name),source_img_180_lr) 
-      io.imsave(path + "/"+"{}_permutation-07.tif".format(name),source_img_270_lr)
-
- 
-def flip(source_img, name, path):
-    source_img_lr = np.fliplr(source_img)
-    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
-
-    
-def correct_channels(img):
-  '''Changes the channel and timepoint channel if channel is bigger than the timepoints'''
-  channel = img.shape[2]
-  timepoint = img.shape[1]
-  # correct eventual wrong channel arrangement change t and c
-  if channel > timepoint:
-      img = img.get_image_data("STCZYX") 
-      img = reshape_data(img, "STCZYX","SCTZYX")
-  else:
-    img = img.get_image_data("STCZYX") 
-    # img = reshape_data(img, "STCZYX","STCZXY")
-
-  print(img.shape)
-  return img
-    
-#def change_axis(img):
-#    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
-#    img = np.swapaxes(img, 1, 2)
-#    return img
