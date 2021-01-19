@@ -7,7 +7,7 @@ import numpy as np
 from data.util import imresize_np
 import shutil
 from skimage import io
-from tqdm import tqdm_notebook
+from tqdm import tqdm
 
 
 def split_test_train_sequences_data(inPath, outPath, guide):
