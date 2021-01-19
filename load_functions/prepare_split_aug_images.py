@@ -46,36 +46,44 @@ def make_folder_with_date(save_location, name):
   return sub_save_location
 
 
-def diplay_img_info(img, divisor):
+def diplay_img_info(img, divisor, use_RGB):
   ### display image data
-    image_resolution = img.shape[-1]
-    nr_z_slices = img.shape[3]
-    nr_channels = img.shape[2]
-    nr_timepoints = img.shape[1]
-    x_dim = img.shape[-1]
+    nr_z_slices = img.shape[1]
+    nr_timepoints = img.shape[0]
+    x_dim = img.shape[-2]
     y_dim = img.shape[-2] 
     x_div = x_dim//divisor
     y_div = y_dim//divisor
     print(img.shape)
-    print("The Resolution is: " + str(image_resolution))
+    print("The Resolution is: " + str(x_dim))
     print("The number of z-slizes is: " + str(nr_z_slices))
     print("The number of timepoints: " + str(nr_timepoints))
-    print("The number of channels: " + str(nr_channels))
+    if use_RGB:
+        nr_channels = img.shape[-1]
+        print("The number of channels: " + str(nr_channels))
+        nr_channels = 1
+    else:
+        nr_channels = 1
     return nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div 
 
 
-def rotation_aug(source_img, name, path, flip=False):
+def rotation_aug(source_img, name, path, use_RGB, flip=False):
     print(source_img.shape)
     # Source Rotation
-    source_img_90 = np.rot90(source_img,axes=(4,5))
-    source_img_180 = np.rot90(source_img_90,axes=(4,5))
-    source_img_270 = np.rot90(source_img_180,axes=(4,5))
+    if use_RGB:
+      source_img_90 = np.rot90(source_img,axes=(-3,-2))
+      source_img_180 = np.rot90(source_img_90,axes=(-3,-2)
+      source_img_270 = np.rot90(source_img_180,axes=(-3,-2))
+    if not use_RGB:
+      source_img_90 = np.rot90(source_img,axes=(-2,-1))
+      source_img_180 = np.rot90(source_img_90,axes=(-2,-1)
+      source_img_270 = np.rot90(source_img_180,axes=(-2,-1))
     # Add a flip to the rotation
     if flip == True:
-      source_img_lr = np.fliplr(source_img)
-      source_img_90_lr = np.fliplr(source_img_90)
-      source_img_180_lr = np.fliplr(source_img_180)
-      source_img_270_lr = np.fliplr(source_img_270)
+      source_img_lr = np.flip(source_img)
+      source_img_90_lr = np.flip(source_img_90)
+      source_img_180_lr = np.flip(source_img_180)
+      source_img_270_lr = np.flip(source_img_270)
 
       #source_img_90_ud = np.flipud(source_img_90)
     # Save the augmented files
@@ -94,7 +102,7 @@ def rotation_aug(source_img, name, path, flip=False):
 
  
 def flip(source_img, name, path):
-    source_img_lr = np.fliplr(source_img)
+    source_img_lr = np.flip(source_img)
     io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
     io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
 
