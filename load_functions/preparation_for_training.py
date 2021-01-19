@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from data.util import imresize_np
 import shutil
+from skimage import io
 
 
 def split_test_train_sequences_data(inPath, outPath, guide):
@@ -250,7 +251,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     i = 0
     for path, key in tqdm(zip(all_img_list, keys)):
         #pbar.update('Write {}'.format(key))
-        img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
+        img = io.imread(path)
         key_byte = key.encode('ascii')
         H, W, C = img.shape  # fixed shape
         assert H == H_dst and W == W_dst and C == 3, 'different shape.'
