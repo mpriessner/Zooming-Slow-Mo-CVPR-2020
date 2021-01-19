@@ -4,10 +4,10 @@ import sys
 sys.path.insert(0,'/content/ZoomInterpolation/codes')
 import cv2
 import numpy as np
-from tqdm import tqdm
 from data.util import imresize_np
 import shutil
 from skimage import io
+from tqdm import tqdm_notebook
 
 
 def split_test_train_sequences_data(inPath, outPath, guide):
@@ -83,7 +83,8 @@ def create_folder_list_from_txt_guide(testlist_txt, trainlist_txt):
 
 def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames):
     """This function generates the high and low resulution images in a given output folder"""
-
+    with open("/content/log.txt", "w") as f:
+      f.write("start")
     create_folder_list_from_txt_guide(train_guide, test_guide)
 
     save_HR = os.path.join(savedir, 'HR')
@@ -126,6 +127,13 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
 
         shutil.copy(test_guide, test_guide_HR)
         shutil.copy(test_guide, test_guide_LR)
+        with open("/content/log.txt", "a") as f:
+            f.write(f'Created new folders: {savedir} \n')
+            f.write(f'Created new folders: {save_HR}\n')
+            f.write(f'Created new folders: {save_LR}\n')
+            f.write(f'Created new folders: {saveHRpath}\n')
+            f.write(f'Created new file: {train_guide_HR}\n')
+            f.write(f'Created new file: {test_guide_LR}\n')
 
     filepaths = get_all_filepaths(sourcedir, N_frames)
     print(f"number of files: {len(filepaths)}")
@@ -138,10 +146,12 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
         # check if file was already processed
         file_checker_path = os.path.join(saveHRpath, file_folder_path)
         if os.path.exists(file_checker_path):
-#           print(f"File already exists: {file_checker_path}")
-            continue
+          with open("/content/log.txt", "a") as f:
+            f.write(f"File already exists: {file_checker_path}\n")
+          continue
         else: 
-#           print('No.{} -- Processing {}'.format(i, filename))
+          with open("/content/log.txt", "a") as f:
+            f.write('No.{} -- Processing {}\n'.format(i, filename))
           # read image
           image = cv2.imread(filename)
 
