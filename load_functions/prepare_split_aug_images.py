@@ -72,11 +72,11 @@ def rotation_aug(source_img, name, path, use_RGB, flip=False):
     # Source Rotation
     if use_RGB:
       source_img_90 = np.rot90(source_img,axes=(-3,-2))
-      source_img_180 = np.rot90(source_img_90,axes=(-3,-2)
+      source_img_180 = np.rot90(source_img_90,axes=(-3,-2))
       source_img_270 = np.rot90(source_img_180,axes=(-3,-2))
     if not use_RGB:
       source_img_90 = np.rot90(source_img,axes=(-2,-1))
-      source_img_180 = np.rot90(source_img_90,axes=(-2,-1)
+      source_img_180 = np.rot90(source_img_90,axes=(-2,-1))
       source_img_270 = np.rot90(source_img_180,axes=(-2,-1))
     # Add a flip to the rotation
     if flip == True:
@@ -108,18 +108,15 @@ def flip(source_img, name, path):
 
     
 def correct_channels(img):
-  '''Changes the channel and timepoint channel if channel is bigger than the timepoints'''
-  channel = img.shape[2]
-  timepoint = img.shape[1]
-  # correct eventual wrong channel arrangement change t and c
-  if channel > timepoint:
-      img = img.get_image_data("STCZYX") 
-      img = reshape_data(img, "STCZYX","SCTZYX")
-  else:
-    img = img.get_image_data("STCZYX") 
-    # img = reshape_data(img, "STCZYX","STCZXY")
+  '''For 2D + T rgb a artificial z channel gets created'''
+  if img.shape[-1] ==3:
+    use_RGB = True
+  if len(img.shape) ==4 and use_RGB:
+    t, x,y,c = img.shape
+    zeros = np.zeros((t,1,y,x,c))
+    zeros[:,0,:,:,:] = img
+    img = zeros
 
-  print(img.shape)
   return img
     
 #def change_axis(img):
