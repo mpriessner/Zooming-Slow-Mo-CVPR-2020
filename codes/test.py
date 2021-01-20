@@ -183,7 +183,7 @@ def main():
                     # resize the image based on zoomfactor
                     zoom = args.zoom
                     zoomfactor = zoom/scale
-                    x,y,_ = output.shape
+                    y, x, _ = output.shape
                     dim = (int(x*zoomfactor),int(y*zoomfactor))   
                     output = cv2.resize(output, dim, interpolation = cv2.INTER_NEAREST) # looks the nicest compared to the others: INTER_LINEAR, INTER_CUBIC, INTER_LANCZOS4
                     cv2.imwrite(osp.join(save_sub_folder, '{:08d}.png'.format(name_idx+1)), output)
