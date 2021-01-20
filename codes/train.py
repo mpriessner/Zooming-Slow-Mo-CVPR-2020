@@ -189,6 +189,7 @@ def main():
     if rank <= 0:
         logger.info('Saving the final model.')
         model.save('latest')
+        model.save_training_state(epoch, current_step)
         logger.info('End of training.')
 
 
