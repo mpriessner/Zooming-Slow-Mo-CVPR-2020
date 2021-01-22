@@ -111,13 +111,14 @@ def correct_channels(img):
   '''For 2D + T rgb a artificial z channel gets created'''
   if img.shape[-1] ==3:
     use_RGB = True
+  else:
+    use_RGB = False
   if len(img.shape) ==4 and use_RGB:
     t, x,y,c = img.shape
     zeros = np.zeros((t,1,y,x,c))
     zeros[:,0,:,:,:] = img
     img = zeros
-
-  return img
+  return img, use_RGB
     
 #def change_axis(img):
 #    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
