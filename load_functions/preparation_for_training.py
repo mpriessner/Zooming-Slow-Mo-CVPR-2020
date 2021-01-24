@@ -139,7 +139,7 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
     print(f"number of files: {len(filepaths)}")
     num_files = len(filepaths)
 
-    # # prepare data with augementation
+ # # prepare data with augementation
     for i in tqdm(range(num_files)):
         filename = filepaths[i]
         file_folder_path = filename[-18:]
@@ -150,24 +150,29 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
             f.write(f"File already exists: {file_checker_path}\n")
           continue
         else: 
-          with open("/content/log.txt", "a") as f:
-            f.write('No.{} -- Processing {}\n'.format(i, filename))
-          # read image
-          image = cv2.imread(filename)
+          try:
+            with open("/content/log.txt", "a") as f:
+              f.write('No.{} -- Processing {}\n'.format(i, filename))
+            # read image
+            image = cv2.imread(filename)
 
-          width = int(np.floor(image.shape[1] / up_scale))
-          height = int(np.floor(image.shape[0] / up_scale))
-          # modcrop
-          if len(image.shape) == 3:
-              image_HR = image[0:up_scale * height, 0:up_scale * width, :]
-          else:
-              image_HR = image[0:up_scale * height, 0:up_scale * width]
-          # LR
-          image_LR = imresize_np(image_HR, 1 / up_scale, True)
-          file_folder_path = filename[-18:]
-          cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
-          cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
+            width = int(np.floor(image.shape[1] / up_scale))
+            height = int(np.floor(image.shape[0] / up_scale))
+            # modcrop
+            if len(image.shape) == 3:
+                image_HR = image[0:up_scale * height, 0:up_scale * width, :]
+            else:
+                image_HR = image[0:up_scale * height, 0:up_scale * width]
+            # LR
+            image_LR = imresize_np(image_HR, 1 / up_scale, True)
+            file_folder_path = filename[-18:]
+            cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
+            cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
+          except:
+            with open("/content/log.txt", "a") as f:
+              f.write('No.{} -- failed {}\n'.format(i, filename))     
     return save_HR, save_LR
+
 
 #############################Prepare LMBD data ##################################
 import os,sys
