@@ -108,9 +108,9 @@ def create_folder_list_from_txt_guide(testlist_txt, trainlist_txt):
         temp.write(line)
 
 
-def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames):
+def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames, log_path):
     """This function generates the high and low resulution images in a given output folder"""
-    with open("/content/log.txt", "w") as f:
+    with open(log_path, "w") as f:
       f.write("start")
     create_folder_list_from_txt_guide(train_guide, test_guide)
 
@@ -154,7 +154,7 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
 
         shutil.copy(test_guide, test_guide_HR)
         shutil.copy(test_guide, test_guide_LR)
-        with open("/content/log.txt", "a") as f:
+        with open(log_path, "a") as f:
             f.write(f'Created new folders: {savedir} \n')
             f.write(f'Created new folders: {save_HR}\n')
             f.write(f'Created new folders: {save_LR}\n')
@@ -173,12 +173,12 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
         # check if file was already processed
         file_checker_path = os.path.join(saveHRpath, file_folder_path)
         if os.path.exists(file_checker_path):
-          with open("/content/log.txt", "a") as f:
+          with open(log_path, "a") as f:
             f.write(f"File already exists: {file_checker_path}\n")
           continue
         else: 
           try:
-            with open("/content/log.txt", "a") as f:
+            with open(log_path, "a") as f:
               f.write('No.{} -- Processing {}\n'.format(i, filename))
             # read image
             image = cv2.imread(filename)
@@ -196,7 +196,7 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
             cv2.imwrite(os.path.join(saveHRpath, file_folder_path), image_HR)
             cv2.imwrite(os.path.join(saveLRpath, file_folder_path), image_LR)
           except:
-            with open("/content/log.txt", "a") as f:
+            with open(log_path, "a") as f:
               f.write('No.{} -- failed {}\n'.format(i, filename))     
     return save_HR, save_LR
 
