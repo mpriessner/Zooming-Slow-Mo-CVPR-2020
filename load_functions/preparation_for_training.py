@@ -296,3 +296,128 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     meta_info['keys'] = key_set
     pickle.dump(meta_info, open(osp.join(lmdb_save_path, 'Vimeo7_train_keys.pkl'), "wb"))
     print('Finish creating lmdb meta info.')
+
+def change_Sakuya_arch(training_scale):
+  """This function changes the network to perform a 4x 2x or no zoom magnification in: Sakuya_arch.py"""
+  file_path_3 = "/content/ZoomInterpolation/codes/models/modules/Sakuya_arch.py"
+  fh_3, abs_path_3 = mkstemp()
+  with fdopen(fh_3,'w') as new_file:
+    with open(file_path_3) as old_file:
+      for counter, line in enumerate(old_file):
+        if counter ==340:
+          if training_scale == 4 or training_scale == 2:
+            new_file.write("        out = self.lrelu(self.pixel_shuffle(self.upconv1(out)))\n")
+          if training_scale ==1: 
+            new_file.write("#        out = self.lrelu(self.pixel_shuffle(self.upconv1(out)))\n")
+        elif counter ==341:
+          if training_scale == 4:
+            new_file.write("        out = self.lrelu(self.pixel_shuffle(self.upconv2(out)))\n")
+          if training_scale == 1 or  training_scale == 2:
+            new_file.write("#        out = self.lrelu(self.pixel_shuffle(self.upconv2(out)))\n")
+        elif counter != 341 or counter != 340 :
+          new_file.write(line)
+
+  copymode(file_path_3, abs_path_3)
+  #Remove original file
+  remove(file_path_3)
+  #Move new file
+  move(abs_path_3, file_path_3) 
+
+def change_dataset_file(HR_px, LR_px):
+  """This function changes the resolution value in the file: Vimeo7_dataset.py"""
+  file_path_2 = "/content/ZoomInterpolation/codes/data/Vimeo7_dataset.py"
+  fh_2, abs_path_2 = mkstemp()
+  with fdopen(fh_2,'w') as new_file:
+    with open(file_path_2) as old_file:
+      for counter, line in enumerate(old_file):
+        if counter ==170:
+          substi_1 = f"{HR_px}, {HR_px}"
+          new_file.write("                img_GT = util.read_img(self.GT_env, key + '_{}'.format(v), (3, "+substi_1+"))\n")
+        elif counter == 176:
+          substi_2 = f"{LR_px}, {LR_px}"
+          new_file.write("        LQ_size_tuple = (3, "+ substi_2 +") if self.LR_input else (3,"+ substi_1+")\n")
+        else:
+          new_file.write(line)
+  copymode(file_path_2, abs_path_2)
+  #Remove original file
+  remove(file_path_2)
+  #Move new file
+  move(abs_path_2, file_path_2) 
+
+
+def change_train_yml(LMBD_HR, LMBD_LR, training_scale, cache_keys, niter, use_pretrained_model, pretrained_network_pth, pretrained_network_state, save_checkpoint_freq, warmup_iter, debug, learning_rate):
+    """This function changes the parameters in the train_zml.yml files"""
+    file_path = "/content/ZoomInterpolation/codes/options/train/train_zsm.yml"
+    if training_scale == 4:
+        GT_size = "128"
+        LQ_size = "32" 
+        scale = "4" 
+        batch_size = "16" 
+    elif training_scale == 2:
+        GT_size = "128"
+        LQ_size = "64" 
+        scale = "2" 
+        batch_size = "5" 
+    elif training_scale == 1:
+        GT_size = "64"
+        LQ_size = "64" 
+        scale = "1" 
+        batch_size = "5"
+
+    if use_pretrained_model == False:
+      pretrained_1_sequence  = "  pretrain_model_G: ~\n"
+      pretrained_2_sequence  = "  resume_state: ~\n"
+    else:
+      pretrained_1_sequence  = f"  pretrain_model_G: {train_info['pretrained_network_pth']}\n" 
+      pretrained_2_sequence  = f"  resume_state: {train_info['pretrained_network_state']}\n"
+
+    # change train_zsm.yml file
+    fh, abs_path = mkstemp()
+    with fdopen(fh,'w') as new_file:
+      with open(file_path) as old_file:
+        for counter, line in enumerate(old_file):
+          if counter ==2:
+            if debug == "True":
+              new_file.write("name: LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo_debug\n")
+            else:
+              new_file.write("name: LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo\n")
+          
+          elif counter ==6:
+            new_file.write(f"scale: {scale}\n") 
+          elif counter ==17:
+            new_file.write(f"    dataroot_GT: {LMBD_HR}\n")
+          elif counter == 18:
+            new_file.write(f"    dataroot_LQ: {LMBD_LR}\n")
+          elif counter == 19:
+            new_file.write(f"    cache_keys: {cache_keys}\n")
+          elif counter == 24:
+            new_file.write(f"    batch_size: {batch_size}\n")
+          elif counter == 25:
+            new_file.write(f"    GT_size: {GT_size}\n")
+          elif counter == 26:
+            new_file.write(f"    GT_size: {LQ_size}\n")
+          elif counter == 44:
+            new_file.write(pretrained_1_sequence)
+          elif counter == 45:
+            if scale !=4:
+              new_file.write("  strict_load: false #true #\n") 
+            else:       
+              new_file.write("  strict_load: true #true #\n") 
+          elif counter == 46:
+            new_file.write(pretrained_2_sequence)
+          elif counter == 50:
+            new_file.write(f"  lr_G: {learning_rate}\n")
+          elif counter == 54:
+            new_file.write(f"  niter: {niter}\n")
+          elif counter == 55:
+            new_file.write(f"  warmup_iter: {warmup_iter} #4000  # -1: no warm up\n")
+          elif counter == 70:
+            new_file.write(f"  save_checkpoint_freq: {save_checkpoint_freq}")            
+          else:
+            new_file.write(line)
+    copymode(file_path, abs_path)
+    #Remove original file
+    remove(file_path)
+    #Move new file
+    move(abs_path, file_path)  
+
