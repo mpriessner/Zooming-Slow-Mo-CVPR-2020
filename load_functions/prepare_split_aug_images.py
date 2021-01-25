@@ -22,6 +22,10 @@ import tifffile
 from aicsimageio.transforms import reshape_data
 from datetime import datetime
 
+from tempfile import mkstemp
+from shutil import move, copymode
+from os import fdopen, remove
+
 
 class bcolors:
     HEADER = '\033[95m'
@@ -66,47 +70,6 @@ def diplay_img_info(img, divisor, use_RGB):
         nr_channels = 1
     return nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div 
 
-
-def rotation_aug(source_img, name, path, use_RGB, flip=False):
-    print(source_img.shape)
-    # Source Rotation
-    if use_RGB:
-      source_img_90 = np.rot90(source_img,axes=(-3,-2))
-      source_img_180 = np.rot90(source_img_90,axes=(-3,-2))
-      source_img_270 = np.rot90(source_img_180,axes=(-3,-2))
-    if not use_RGB:
-      source_img_90 = np.rot90(source_img,axes=(-2,-1))
-      source_img_180 = np.rot90(source_img_90,axes=(-2,-1))
-      source_img_270 = np.rot90(source_img_180,axes=(-2,-1))
-    # Add a flip to the rotation
-    if flip == True:
-      source_img_lr = np.flip(source_img)
-      source_img_90_lr = np.flip(source_img_90)
-      source_img_180_lr = np.flip(source_img_180)
-      source_img_270_lr = np.flip(source_img_270)
-
-      #source_img_90_ud = np.flipud(source_img_90)
-    # Save the augmented files
-    # Source images
-    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_permutation-01.tif".format(name),source_img_90)
-    io.imsave(path + "/"+"{}_permutation-02.tif".format(name),source_img_180)
-    io.imsave(path + "/"+"{}_permutation-03.tif".format(name),source_img_270)
-    # Target images
-   
-    if flip == True:
-      io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
-      io.imsave(path + "/"+"{}_permutation-05.tif".format(name),source_img_90_lr)
-      io.imsave(path + "/"+"{}_permutation-06.tif".format(name),source_img_180_lr) 
-      io.imsave(path + "/"+"{}_permutation-07.tif".format(name),source_img_270_lr)
-
- 
-def flip(source_img, name, path):
-    source_img_lr = np.flip(source_img)
-    io.imsave(path + "/"+"{}_permutation-00.tif".format(name),source_img)
-    io.imsave(path + "/"+"{}_permutation-04.tif".format(name),source_img_lr)
-
-    
 def correct_channels(img):
   '''For 2D + T rgb a artificial z channel gets created'''
   if img.shape[-1] ==3:
@@ -120,7 +83,22 @@ def correct_channels(img):
     img = zeros
   return img, use_RGB
     
-#def change_axis(img):
-#    img = img.get_image_data("STCZYX")  # returns 4D CZYX numpy array
-#    img = np.swapaxes(img, 1, 2)
-#    return img
+
+def change_train_file(zoomfactor, model_path):
+  """This function changes the resolution value in the file: Vimeo7_dataset.py"""
+  file_path_2 = "/content/ZoomInterpolation/codes/test_new.py"
+  fh_2, abs_path_2 = mkstemp()
+  with fdopen(fh_2,'w') as new_file:
+    with open(file_path_2) as old_file:
+      for counter, line in enumerate(old_file):
+        if counter ==27:
+          new_file.write(f"    scale = {zoomfactor}\n")
+        elif counter == 34:
+          new_file.write(f"    model_path = '{model_path}'\n")
+        else:
+          new_file.write(line)
+  copymode(file_path_2, abs_path_2)
+  #Remove original file
+  remove(file_path_2)
+  #Move new file
+  move(abs_path_2, file_path_2) 
