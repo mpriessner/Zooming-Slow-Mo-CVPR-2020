@@ -13,6 +13,30 @@ from tempfile import mkstemp
 from shutil import move, copymode
 from os import fdopen, remove
 
+def get_img_dim(img):
+  """This function gets the right x,y,t,z dimensions and if it is an RGB image or not"""
+  if (img.shape[-1] ==3 and len(img.shape) ==5):
+    use_RGB = True
+    t_dim, z_dim, y_dim, x_dim, _ = img.shape
+  elif (img.shape[-1] ==3 and len(img.shape) ==4):
+    use_RGB = True
+    t_dim, y_dim, x_dim, channel = img.shape
+    zeros = np.zeros((t_dim,1,y_dim,x_dim,channel))
+    zeros[:,0,:,:,:] = img
+    img = zeros
+    t_dim, z_dim, y_dim, x_dim, _ = img.shape
+  elif (img.shape[-1] !=3 and len(img.shape) ==3):  # create a 4th dimension
+    use_RGB = False
+    t, y, x = img.shape
+    zeros = np.zeros((t,1,y,x))
+    zeros[:,0,:,:] = img
+    img = zeros
+    t_dim, z_dim, y_dim, x_dim= img.shape
+  elif (img.shape[-1] !=3 and len(img.shape) ==4):
+    use_RGB = False
+    t_dim, z_dim, y_dim, x_dim = img.shape
+  return t_dim, z_dim, y_dim, x_dim, use_RGB
+
 def split_test_train_sequences_data(inPath, outPath, guide):
   """This function splits the sequences folder into the test and train folder with the given format
   based on the guide txt files"""
