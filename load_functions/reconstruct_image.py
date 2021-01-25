@@ -49,7 +49,7 @@ def save_image(temp_img, folder_option, slice_count, file_count, save_location_i
     io.imsave(save_location_image+f"/{file_name}_zf-{zoomfactor}.tif", temp_img_final)
 
     
-def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape, use_RGB):
+def save_as_h5py(img_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape, use_RGB):
     '''this function saves the the single images of each 4D file into one h5py file'''
     zt_dim = len(zt_list)
     xy_dim = int(product_image_shape/multiplyer)
@@ -61,54 +61,54 @@ def save_as_h5py(img_list, permutation_list, fraction_list, zt_list, file_nr, in
       h5py_safe_location_list.append(h5py_safe_location)
       with h5py.File(h5py_safe_location, 'w') as f:
         
-        for permutation in permutation_list:
-          for zt in tqdm(zt_list):
+        # for permutation in permutation_list:
+        for zt in tqdm(zt_list):
+
+          if use_RGB:
+            temp_img_3D = np.zeros((len(file_nr), multiplyer*xy_dim, multiplyer*xy_dim, 3))
+          else:
+            temp_img_3D = np.zeros((len(file_nr), multiplyer*xy_dim, multiplyer*xy_dim))
+            
+          for single_file_nr, single_file in enumerate(file_nr):
 
             if use_RGB:
-              temp_img_3D = np.zeros((len(file_nr), multiplyer*xy_dim, multiplyer*xy_dim, 3))
+                temp_img_2D = np.zeros((multiplyer*xy_dim, multiplyer*xy_dim, 3))
             else:
-              temp_img_3D = np.zeros((len(file_nr), multiplyer*xy_dim, multiplyer*xy_dim))
-              
-            for single_file_nr, single_file in enumerate(file_nr):
+                temp_img_2D = np.zeros((multiplyer*xy_dim, multiplyer*xy_dim))
+            
+            counter_x = 0
+            counter_y = 0
+            for num, fraction in enumerate(fraction_list):
 
-              if use_RGB:
-                 temp_img_2D = np.zeros((multiplyer*xy_dim, multiplyer*xy_dim, 3))
-              else:
-                 temp_img_2D = np.zeros((multiplyer*xy_dim, multiplyer*xy_dim))
-             
-              counter_x = 0
-              counter_y = 0
-              for num, fraction in enumerate(fraction_list):
+                if counter_x == multiplyer:
+                  counter_x = 0
+                  counter_y+=1
 
-                  if counter_x == multiplyer:
-                    counter_x = 0
-                    counter_y+=1
+                key = f"{image}_{fraction}_{zt}/{single_file}"
+                img_path = os.path.join(interpolate_location, key)
+                img = io.imread(img_path)
 
-                  key = f"{image}_{fraction}_{permutation}_{zt}/{single_file}"
-                  img_path = os.path.join(interpolate_location, key)
-                  img = io.imread(img_path)
+                if use_RGB == True:
+                  img = img # otherwise there are 3 channels
+                else:
+                  img = img[:,:,0] # otherwise there are 3 channels
 
-                  if use_RGB == True:
-                    img = img # otherwise there are 3 channels
-                  else:
-                    img = img[:,:,0] # otherwise there are 3 channels
+                img = img.astype('uint8')
 
-                  img = img.astype('uint8')
+                if use_RGB:
+                  temp_img_2D[counter_y*xy_dim:(counter_y+1)*xy_dim,counter_x*xy_dim:(counter_x+1)*xy_dim,:] = img
+                else:
+                  temp_img_2D[counter_y*xy_dim:(counter_y+1)*xy_dim,counter_x*xy_dim:(counter_x+1)*xy_dim] = img
 
-                  if use_RGB:
-                    temp_img_2D[counter_y*xy_dim:(counter_y+1)*xy_dim,counter_x*xy_dim:(counter_x+1)*xy_dim,:] = img
-                  else:
-                    temp_img_2D[counter_y*xy_dim:(counter_y+1)*xy_dim,counter_x*xy_dim:(counter_x+1)*xy_dim] = img
+                counter_x += 1
 
-                  counter_x += 1
+            if use_RGB:
+              temp_img_3D[single_file_nr,:,:,:] = temp_img_2D
+            else:  
+              temp_img_3D[single_file_nr,:,:] = temp_img_2D
 
-              if use_RGB:
-                temp_img_3D[single_file_nr,:,:,:] = temp_img_2D
-              else:  
-                temp_img_3D[single_file_nr,:,:] = temp_img_2D
-
-            name = f"{image}_{permutation}_{zt}"
-            f.create_dataset(f"{name}", data=np.array(temp_img_3D, dtype=np.uint8))
+          name = f"{image}_{zt}"
+          f.create_dataset(f"{name}", data=np.array(temp_img_3D, dtype=np.uint8))
 
     return h5py_safe_location_list
 
