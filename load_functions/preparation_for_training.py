@@ -9,6 +9,9 @@ import shutil
 from skimage import io
 from tqdm import tqdm
 
+from tempfile import mkstemp
+from shutil import move, copymode
+from os import fdopen, remove
 
 def split_test_train_sequences_data(inPath, outPath, guide):
   """This function splits the sequences folder into the test and train folder with the given format
