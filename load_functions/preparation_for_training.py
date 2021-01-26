@@ -399,8 +399,8 @@ def change_train_yml(LMBD_HR, LMBD_LR, training_scale, cache_keys, niter, use_pr
       pretrained_1_sequence  = "  pretrain_model_G: ~\n"
       pretrained_2_sequence  = "  resume_state: ~\n"
     else:
-      pretrained_1_sequence  = f"  pretrain_model_G: {train_info['pretrained_network_pth']}\n" 
-      pretrained_2_sequence  = f"  resume_state: {train_info['pretrained_network_state']}\n"
+      pretrained_1_sequence  = f"  pretrain_model_G: {pretrained_network_pth}\n" 
+      pretrained_2_sequence  = f"  resume_state: {pretrained_network_state}\n"
 
     # change train_zsm.yml file
     fh, abs_path = mkstemp()
