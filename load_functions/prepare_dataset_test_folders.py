@@ -20,8 +20,8 @@ def downsample_z_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
     t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
-    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[0][:3]
-    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:2]
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
 
     #create new directory-path
     for num_t in tqdm(range(0,t)):
@@ -69,8 +69,8 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
     t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
-    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[0][:3]
-    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:2]
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
 
     #create new directory-path
     for num_z in tqdm(range(0,z)):
@@ -118,8 +118,8 @@ def upsample_t_creation(img_path_list, file_num, sub_save_location):
     t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
     img_path = img_path_list[file_num]
-    img_nr = img_path.split("/")[-1].split(".")[0].split("-")[0][:3]
-    fr_nr = img_path.split("/")[-1].split(".")[0].split("-")[1][:2]
+    img_nr = img_path.split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path.split("/")[-1].split(".")[0].split("-")[2][:2]
     
     #create new directory-path
     for num_z in tqdm(range(0,z)):   # dim_2 = zdimension
@@ -152,8 +152,8 @@ def upsample_z_creation(img_path_list, file_num, sub_save_location):
     os.chdir(sub_save_location)
     t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num]) #dim_1=t, dim_2=z
     # folder_steps = str(file_num) + "_steps"
-    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[0][:3]
-    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:2]
+    img_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[1][:3]
+    fr_nr = img_path_list[file_num].split("/")[-1].split(".")[0].split("-")[2][:2]
     # folder_file_path = os.path.join(sub_save_location,file_to_folder_name)
     # os.mkdir(folder_file_path)
 
