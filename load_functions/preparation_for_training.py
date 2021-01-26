@@ -110,8 +110,7 @@ def create_folder_list_from_txt_guide(testlist_txt, trainlist_txt):
 
 def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames, log_path):
     """This function generates the high and low resulution images in a given output folder"""
-    with open(log_path, "w") as f:
-      f.write("start")
+
     create_folder_list_from_txt_guide(train_guide, test_guide)
 
     save_HR = os.path.join(savedir, 'HR')
@@ -154,6 +153,8 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
 
         shutil.copy(test_guide, test_guide_HR)
         shutil.copy(test_guide, test_guide_LR)
+        with open(log_path, "w") as f:
+            f.write("start")
         with open(log_path, "a") as f:
             f.write(f'Created new folders: {savedir} \n')
             f.write(f'Created new folders: {save_HR}\n')
@@ -161,7 +162,9 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
             f.write(f'Created new folders: {saveHRpath}\n')
             f.write(f'Created new file: {train_guide_HR}\n')
             f.write(f'Created new file: {test_guide_LR}\n')
-
+    else:
+        with open(log_path, "w") as f:
+            f.write("start")
     filepaths = get_all_filepaths(sourcedir, N_frames)
     print(f"number of files: {len(filepaths)}")
     num_files = len(filepaths)
@@ -198,6 +201,7 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
           except:
             with open(log_path, "a") as f:
               f.write('No.{} -- failed {}\n'.format(i, filename))     
+
     return save_HR, save_LR
 
 
