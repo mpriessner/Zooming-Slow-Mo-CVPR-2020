@@ -71,15 +71,20 @@ def diplay_img_info(img, divisor, use_RGB):
     return nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div 
 
 def correct_channels(img):
-  '''For 2D + T rgb a artificial z channel gets created'''
+  '''For 2D + T (with or without RGB) a artificial z channel gets created'''
   if img.shape[-1] ==3:
     use_RGB = True
   else:
     use_RGB = False
   if len(img.shape) ==4 and use_RGB:
-    t, x,y,c = img.shape
+    t, x, y, c = img.shape
     zeros = np.zeros((t,1,y,x,c))
     zeros[:,0,:,:,:] = img
+    img = zeros
+  elif len(img.shape) ==3 and not use_RGB:
+    t, x, y = img.shape
+    zeros = np.zeros((t,1,y,x))
+    zeros[:,0,:,:] = img
     img = zeros
   return img, use_RGB
     
