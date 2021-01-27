@@ -40,8 +40,8 @@ def get_img_dim(img):
 def split_test_train_sequences_data(inPath, outPath, guide):
   """This function splits the sequences folder into the test and train folder with the given format
   based on the guide txt files"""
-  if os.path.isdir(outPath):
-    shutil.rmtree(outPath)
+  #if os.path.isdir(outPath):
+  #  shutil.rmtree(outPath)
   f = open(guide, "r")
   lines = f.readlines()
   for l in tqdm(lines):
