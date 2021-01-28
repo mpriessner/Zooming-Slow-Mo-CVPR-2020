@@ -185,7 +185,13 @@ def main():
                     logger.info('Saving models and training states.')
                     model.save(current_step)
                     model.save_training_state(epoch, current_step)
-
+                    import shutil
+                    import os
+                    source = "/content/ZoomInterpolation/experiments/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo"
+                    destination = "/content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210126_4D_cell_fine_Tuning/out_big/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo"
+                    if os.path.exists(destination):
+                        shutil.rmtree(destination)
+                    shutil.copytree(source, destination)
     if rank <= 0:
         logger.info('Saving the final model.')
         model.save(current_step)
