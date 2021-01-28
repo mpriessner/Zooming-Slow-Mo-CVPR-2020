@@ -460,7 +460,7 @@ def change_train_file(backup_location):
     with open(file_path_2) as old_file:
       for counter, line in enumerate(old_file):
         if counter ==190:
-          destination = f'                    destination = "{backup_location}/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo\n"'
+          destination = f'                    destination = "{backup_location}/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo"\n'
           new_file.write(destination)
         else:
           new_file.write(line)
