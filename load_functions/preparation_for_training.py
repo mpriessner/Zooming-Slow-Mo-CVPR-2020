@@ -451,4 +451,22 @@ def change_train_yml(LMBD_HR, LMBD_LR, training_scale, cache_keys, niter, use_pr
     remove(file_path)
     #Move new file
     move(abs_path, file_path)  
+    
+def change_train_file(backup_location):
+  """This function changes the resolution value in the file: Vimeo7_dataset.py"""
+  file_path_2 = "/content/ZoomInterpolation/codes/train.py"
+  fh_2, abs_path_2 = mkstemp()
+  with fdopen(fh_2,'w') as new_file:
+    with open(file_path_2) as old_file:
+      for counter, line in enumerate(old_file):
+        if counter ==190:
+          destination = f'                    destination = "{backup_location}/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo\n"'
+          new_file.write(destination)
+        else:
+          new_file.write(line)
+  copymode(file_path_2, abs_path_2)
+  #Remove original file
+  remove(file_path_2)
+  #Move new file
+  move(abs_path_2, file_path_2) 
 
