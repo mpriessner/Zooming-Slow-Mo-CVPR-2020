@@ -357,7 +357,7 @@ def change_Sakuya_arch(training_scale):
 def change_dataset_file(HR_px, LR_px, training_scale, original_trainingset = False):
   """This function changes the resolution value in the file: Vimeo7_dataset.py"""
   if training_scale ==1:
-    foctor = 4
+    factor = 4
   elif training_scale ==2:
     factor = 2
   elif training_scale == 4:
