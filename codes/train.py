@@ -144,7 +144,7 @@ def main():
     else:
         current_step = 0
         start_epoch = 0
-    save_counter =0
+
     #### training
     logger.info('Start training from epoch: {:d}, iter: {:d}'.format(start_epoch, current_step))
     for epoch in range(start_epoch, total_epochs + 1):
@@ -188,7 +188,9 @@ def main():
                     import shutil
                     import os
                     source = "/content/ZoomInterpolation/experiments/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo"
-                    destination = "/content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210126_4D_cell_fine_Tuning/out_big/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo_%03d"%save_counter
+                    destination = "/content/gdrive/MyDrive/1.2_BIG_DATA_PhD_Project_2/6.ZoomInterpolation/20210126_4D_cell_fine_Tuning/out_big/LunaTokis_scratch_b16p32f5b40n7l1_600k_Vimeo"
+                    if os.path.exists(destination):
+                        shutil.rmtree(destination)
                     shutil.copytree(source, destination)
                     save_counter +=1
     if rank <= 0:
