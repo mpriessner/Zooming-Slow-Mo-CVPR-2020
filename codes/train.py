@@ -192,7 +192,7 @@ def main():
                     if os.path.exists(destination):
                         shutil.rmtree(destination)
                     shutil.copytree(source, destination)
-                    save_counter +=1
+                    
     if rank <= 0:
         logger.info('Saving the final model.')
         model.save(current_step)
