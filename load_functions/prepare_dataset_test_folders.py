@@ -33,7 +33,7 @@ def downsample_z_creation(img_path_list, file_num, sub_save_location):
         for num_z in range(z):
           if (num_z % 2) == 0:
             #create new directory-path
-            file_name = ("z_%03d" %(num_z))
+            file_name = ("dz_%03d" %(num_z))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
@@ -45,12 +45,11 @@ def downsample_z_creation(img_path_list, file_num, sub_save_location):
               img_save_1 = img[num_t,num_z, :, :, :] 
               img_save_1 = convert(img_save_1, 0, 255, np.uint8)
               # # saving images as PNG
-              io.imsave("{}.png".format(file_name), img_save_1)
-              # writer1.save(img_save_1)
+            io.imsave("{}.png".format(file_name), img_save_1)
 
           #save the last slide on top labeled with x
           if num_z == z-1 and (num_z % 2) != 0:
-            file_name = ("z_%03d" %(num_z))
+            file_name = ("dz_%03d" %(num_z))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning 
@@ -82,7 +81,7 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
         for num_t in range(t):
           if (num_t % 2) == 0:
             #create new directory-path
-            file_name = ("t_%03d" %(num_t))
+            file_name = ("dt_%03d" %(num_t))
 
             # #here put the image pngs into the folder (instead of creating the folder)
             # #convert image to unit8 otherwise warning
@@ -98,7 +97,7 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
 
           #save the last slide on top labeled with x
           if num_t == t-1 and (num_t % 2) != 0:
-            file_name = ("t_%03d" %(num_t))
+            file_name = ("dt_%03d" %(num_t))
 
             if use_RGB == False:
               # #here put the image pngs into the folder (instead of creating the folder)
@@ -113,7 +112,12 @@ def downsample_t_creation(img_path_list, file_num, sub_save_location):
             io.imsave("{}-x.png".format(file_name), img_save_1)
 
             
-def upsample_t_creation(img_path_list, file_num, sub_save_location):
+def upsample_t_creation(img_path_list, file_num, sub_save_location, folder_option):
+    # to differentiate between zoom and normal upsampling in t dim
+    if folder_option =="zoom":
+      marker = "z"
+    else:
+      marker = "u"
     os.chdir(sub_save_location)
     t, z, y_dim,x_dim, img, use_RGB = load_img(img_path_list[file_num])
     # folder_steps = str(file_num) + "_steps"
@@ -130,7 +134,7 @@ def upsample_t_creation(img_path_list, file_num, sub_save_location):
         os.chdir(folder_name)
         for num_t in range(t):
           #create new directory-path
-          file_name = ("t_%03d" %(num_t))
+          file_name = (f"{marker}t_%03d" %(num_t))
 
           # #here put the image pngs into the folder (instead of creating the folder)
           # #convert image to unit8 otherwise warning
@@ -166,7 +170,7 @@ def upsample_z_creation(img_path_list, file_num, sub_save_location):
         os.chdir(folder_name)
         for num_z in range(z):
           #create new directory-path
-          file_name = ("z_%03d"%(num_z))
+          file_name = ("uz_%03d"%(num_z))
           # #convert image to unit8 otherwise warning
 
           if use_RGB == False:
