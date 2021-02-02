@@ -22,7 +22,7 @@ import models.modules.Sakuya_arch as Sakuya_arch
 def main():
     #### options
     parser = argparse.ArgumentParser()
-    parser.add_argument('--zoom', type=int, default=1, help='Select zoom factor of the image')
+    parser.add_argument('--corr', type=bool, default=False, help='Select zoom factor of the image')
     args = parser.parse_args()
 
     scale = 4
@@ -179,8 +179,22 @@ def main():
                 output_f = outputs[idx,:,:,:].squeeze(0)
 
                 output = util.tensor2img(output_f)
-                if save_imgs:              
-                    cv2.imwrite(osp.join(save_sub_folder, '{:08d}.png'.format(name_idx+1)), output)
+                if save_imgs:   
+                  corr = args.corr
+                  if corr == "True":    # perform gamma correction because interpolated images have different brightness
+                      if (idx % 2) == 0:
+                        brightness_even = output.mean()
+                      else:
+                        output = cv2.blur(output,(3,3))
+                        brightness_odd = output.mean()
+                        gamma = math.sqrt(brightness_even/brightness_odd)
+                        # gamma =brightness_even/brightness_odd
+                        output = np.power(output, gamma)
+                        # output = output*gamma
+                        corrected_brightness = output.mean()
+                        print(f"gamma {gamma} brightness_odd {brightness_odd} brightness_even {brightness_even} corrected_brightness {corrected_brightness} ")
+
+                  cv2.imwrite(osp.join(save_sub_folder, '{:08d}.png'.format(name_idx+1)), output)
 
                 if 'Custom' not in data_mode:
                     #### calculate PSNR
