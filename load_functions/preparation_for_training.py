@@ -288,7 +288,7 @@ def save_to_lmbd(img_folder, test_or_train, H_dst, W_dst, batch, mode, scale_fac
     print('Read images with multiprocessing, #thread: {} ...'.format(n_thread))
     
     #### create lmdb environment
-    env = lmdb.open(lmdb_save_path, map_size=data_size * 30)
+    env = lmdb.open(lmdb_save_path, map_size=data_size * 100)
     txn = env.begin(write=True)  # txn is a Transaction object
 
     #### write data to lmdb
