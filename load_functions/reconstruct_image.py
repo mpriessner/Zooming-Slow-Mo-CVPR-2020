@@ -28,29 +28,38 @@ def get_folder_list(source_path):
 
 
 
-def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim):
+
+def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB):
   """ This function saves the temp image and re-structures the channels in the right order for the z-dimension"""
   # remove the first slice of zeros
   # print(f"save temp_img: {temp_img.shape}")
-  temp_img_final = temp_img[1:,:,:,:]
+  if use_RGB:
+    temp_img_final = temp_img[1:,:,:,:,:]
+  else:
+    temp_img_final = temp_img[1:,:,:,:]
+    
   if folder_option == "upsample-z" or folder_option == "downsample-z":
     if (tz_dim % 2) != 0: # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
-      temp_img_final = temp_img_final[:,:-1,:,:] # remove the last image to get the same dimensions
+      if use_RGB:
+        temp_img_final = temp_img_final[:,:-1,:,:,:] # remove the last image to get the same dimensions
+      else: 
+        temp_img_final = temp_img_final[:,:-1,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_{zoomfactor}x_Z.tif", temp_img_final)
 
   elif folder_option == "upsample-t" or folder_option == "downsample-t" :
     temp_img_final = np.swapaxes(temp_img_final, 0, 1)
     if (tz_dim % 2) == 0:  # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
-      temp_img_final = temp_img_final[:-1,:,:,:] # remove the last image to get the same dimensions
+      if use_RGB:
+        temp_img_final = temp_img_final[:-1,:,:,:,:] # remove the last image to get the same dimensions
+      else:
+        temp_img_final = temp_img_final[:-1,:,:,:] # remove the last image to get the same dimensions
     io.imsave(save_location_image+f"/{file_name}_{zoomfactor}x_T.tif", temp_img_final)
-
 
   elif folder_option == "zoom":
     temp_img_final = np.swapaxes(temp_img_final, 0, 1)
     io.imsave(save_location_image+f"/{file_name}_{zoomfactor}x.tif", temp_img_final)
+   
 
-
-    
 def save_as_h5py(img_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape, use_RGB):
     '''this function saves the the single images of each 4D file into one h5py file'''
     zt_dim = len(zt_list)
