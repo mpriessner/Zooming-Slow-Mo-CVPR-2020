@@ -1,5 +1,7 @@
 #WORKING
 import os
+import sys
+sys.path.insert(0,'/content/ZoomInterpolation/load_functions')
 from skimage import io
 import numpy as np
 from tqdm import tqdm
@@ -395,3 +397,37 @@ def data_preparation_for_zoominterpolation(folder_option, save_location):
         upsample_t_creation(img_path_list, file_num, sub_save_location, folder_option)
     return sub_save_location
 
+
+from preparation_for_training import change_Sakuya_arch
+
+def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models):
+    img_folder_path_interpolate = sub_save_location
+
+    !rm -rf "/content/ZoomInterpolation/test_example"
+    shutil.copytree(img_folder_path_interpolate,"/content/ZoomInterpolation/test_example")
+    os.chdir("/content/ZoomInterpolation/codes")
+
+    if use_fine_tuned_models:
+      if zoomfactor ==1:
+        change_train_file(zoomfactor, pretrained_model_path)
+        change_Sakuya_arch(zoomfactor)
+      elif zoomfactor ==2:
+        change_train_file(zoomfactor, pretrained_model_path)
+        change_Sakuya_arch(zoomfactor)
+      elif zoomfactor ==4:
+        change_train_file(zoomfactor, pretrained_model_path)
+        change_Sakuya_arch(zoomfactor)
+    else:
+      pretrained_model_path_1x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_1x.pth"
+      pretrained_model_path_2x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_2x.pth"
+      pretrained_model_path_4x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_4x.pth"
+      if zoomfactor ==1:
+        change_train_file(zoomfactor, pretrained_model_path_1x)
+        change_Sakuya_arch(zoomfactor)
+      elif zoomfactor ==2:
+        change_train_file(zoomfactor, pretrained_model_path_2x)
+        change_Sakuya_arch(zoomfactor)
+      elif zoomfactor ==4:
+        change_train_file(zoomfactor, pretrained_model_path_4x)
+        change_Sakuya_arch(zoomfactor)
+  return img_folder_path_interpolate
