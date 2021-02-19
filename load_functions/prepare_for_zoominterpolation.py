@@ -348,3 +348,50 @@ def change_train_file(zoomfactor, model_path):
   remove(file_path_2)
   #Move new file
   move(abs_path_2, file_path_2) 
+
+
+
+#############################################################################
+
+def data_preparation_for_zoominterpolation(folder_option, save_location):
+    if folder_option == "upsample-t":
+      name = "upsample-t"
+      img_path_list = []
+      img_path_list = get_img_path_list(img_path_list, split_img_folder_path) 
+      sub_save_location = make_folder_with_date(save_location, name)
+      for file_num in range(len(img_path_list)):
+        upsample_t_creation(img_path_list, file_num, sub_save_location, folder_option)
+
+    elif folder_option == "upsample-z":
+      name = "upsample-z"
+      img_path_list = []
+      img_path_list = get_img_path_list(img_path_list, split_img_folder_path) 
+      sub_save_location = make_folder_with_date(save_location, name)
+      for file_num in range(len(img_path_list)):
+        upsample_z_creation(img_path_list, file_num, sub_save_location,)
+
+    elif folder_option == "downsample-t":
+      name = "downsample-t"
+      img_path_list = []
+      img_path_list = get_img_path_list(img_path_list, split_img_folder_path) 
+      sub_save_location = make_folder_with_date(save_location, name)
+      for file_num in range(len(img_path_list)):
+        downsample_t_creation(img_path_list, file_num, sub_save_location,)
+
+    elif folder_option == "downsample-z":
+      name = "downsample-z"
+      img_path_list = []
+      img_path_list = get_img_path_list(img_path_list, split_img_folder_path) 
+      sub_save_location = make_folder_with_date(save_location, name)
+      for file_num in range(len(img_path_list)):
+        downsample_z_creation(img_path_list, file_num, sub_save_location)
+        
+    elif folder_option == "zoom":
+      name = "zoom"
+      img_path_list = []
+      img_path_list = get_img_path_list(img_path_list, split_img_folder_path) 
+      sub_save_location = make_folder_with_date(save_location, name)
+      for file_num in range(len(img_path_list)):
+        upsample_t_creation(img_path_list, file_num, sub_save_location, folder_option)
+    return sub_save_location
+
