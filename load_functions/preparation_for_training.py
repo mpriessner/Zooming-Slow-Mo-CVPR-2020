@@ -485,3 +485,67 @@ def change_train_file(backup_location):
   remove(file_path_2)
   #Move new file
   move(abs_path_2, file_path_2) 
+  
+  
+  
+  ############################################################
+  
+import shutil
+import os
+from tqdm import tqdm
+import sys
+sys.path.insert(0,'/content/ZoomInterpolation/load_functions')
+
+  
+def run_split_sequence(mode, scale_factor, save_HR, save_LR, test_or_train, outPath_test):
+    if mode == "HR":
+      sequences_path = os.path.join(save_HR, f"x{scale_factor}")
+      train_guide = os.path.join(save_HR, "sep_trainlist.txt")
+      test_guide = os.path.join(save_HR, "sep_testlist.txt")
+      if test_or_train == "test":
+          outPath_test = os.path.join(save_HR, f"test_{scale_factor}")
+          split_test_train_sequences_data(sequences_path, outPath_test, test_guide)
+      if test_or_train == "train":
+          outPath_train = os.path.join(save_HR, f"train_{scale_factor}")
+          split_test_train_sequences_data(sequences_path, outPath_train, train_guide)
+
+    if mode == "LR":
+      sequences_path = os.path.join(save_LR, f"x{scale_factor}")
+      train_guide = os.path.join(save_LR, "sep_trainlist.txt")
+      test_guide = os.path.join(save_LR, "sep_testlist.txt")
+      if test_or_train == "test":
+          outPath_test = os.path.join(save_LR, f"test_{scale_factor}")
+          split_test_train_sequences_data(sequences_path, outPath_test, test_guide)
+      if test_or_train == "train":
+          outPath_train = os.path.join(save_LR, f"train_{scale_factor}")
+          split_test_train_sequences_data(sequences_path, outPath_train, train_guide)
+    return sequences_path, train_guide, test_guide, outPath_test
+
+  
+  
+def prepare_lmbd(save_HR, save_LR, HR_input_dim, scale_factor, batch):
+  
+  LR_input_dim = HR_input_dim/scale_factor
+
+  test_or_train = "train"
+  mode = "HR"
+  save_to_lmbd(save_HR, test_or_train, HR_input_dim, HR_input_dim, batch, mode, scale_factor)
+
+  mode = "LR"
+  save_to_lmbd(save_LR, test_or_train, LR_input_dim, LR_input_dim, batch, mode, scale_factor)
+  
+  test_or_train = "test"
+  mode = "HR"
+  save_to_lmbd(save_HR, test_or_train, HR_input_dim, HR_input_dim, batch, mode, scale_factor)
+  
+  mode = "LR"
+  save_to_lmbd(save_LR, test_or_train, LR_input_dim, LR_input_dim, batch, mode, scale_factor)
+
+
+  train_LMBD_HR = save_HR + "/vimeo7_train_x{}_HR.lmdb".format(scale_factor)
+  train_LMBD_LR = save_LR + "/vimeo7_train_x{}_HR.lmdb".format(scale_factor)
+
+  test_LMBD_HR = save_HR + "/vimeo7_test_x{}_HR.lmdb".format(scale_factor)
+  test_LMBD_LR = save_LR + "/vimeo7_test_x{}_HR.lmdb".format(scale_factor)
+  return train_LMBD_HR, train_LMBD_LR, test_LMBD_HR, test_LMBD_LR, LR_input_dim 
+
