@@ -431,3 +431,139 @@ def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model
         change_train_file(zoomfactor, pretrained_model_path_4x)
         change_Sakuya_arch(zoomfactor)
   return img_folder_path_interpolate
+
+
+
+def save_interpolated_image(interpolate_location, divisor, zoomfactor, use_RGB):
+    import sys
+    sys.path.insert(0,'/content/ZoomInterpolation/load_functions')
+    from reconstruct_image import get_file_list
+    from reconstruct_image import get_folder_list
+    # from reconstruct_image import save_image
+    # from reconstruct_image import save_as_h5py
+    from prepare_dataset_test_folders import make_folder_with_date
+    import os
+    import pandas as pd
+    from tqdm import tqdm
+    import h5py
+    import numpy as np
+    from timeit import default_timer as timer
+    from datetime import datetime
+    import h5py
+    import math
+    from pympler import asizeof
+
+    # create a list of the identifyer for 
+    img_list         = []
+    fraction_list    = []
+    zt_list          = []
+
+    # Get all the different identifier from the foldername
+    # which provides the information of how many images and 
+    # dimensions the reconstructed image will have
+    folder_list = get_folder_list(interpolate_location)
+    folder_name_list = [i.split("/")[-1] for i in folder_list]
+    for folder_name in folder_name_list:
+      image_nr =        folder_name.split("_")[0][:]
+      fraction_nr =     folder_name.split("_")[1][:]
+      # permutation_nr =  folder_name.split("_")[2][:]
+      zt_nr =           folder_name.split("_")[2][:]
+      file_nr =         os.listdir(folder_list[0])
+      file_nr.sort()
+      if image_nr not in img_list:
+        img_list.append(image_nr)
+      if fraction_nr not in fraction_list:
+        fraction_list.append(fraction_nr)
+      # if permutation_nr not in permutation_list:
+      #   permutation_list.append(permutation_nr)
+      if zt_nr not in zt_list:
+        zt_list.append(zt_nr)
+
+    # find the dimensions of the reconstructed image (important for big images
+    # that are split in smaller pieces) 
+    # find out what is the output dimension of the image
+    img_multiplyer = len(fraction_list)
+    if img_multiplyer == 1:
+        multiplyer = 1
+        product_image_shape = divisor* multiplyer*zoomfactor
+    elif img_multiplyer == 4:
+        multiplyer = 2
+        product_image_shape = divisor * multiplyer*zoomfactor
+    elif img_multiplyer == 16:
+        multiplyer = 4
+        product_image_shape = divisor *multiplyer*zoomfactor
+
+    print(f"img_list is: {img_list}")
+    print(f"fraction_list is: {fraction_list}")
+    # print(f"Permutation_list is: {permutation_list}")
+    print(f"zt_list is: {zt_list}")
+    print(f"Product_image_shape is: {product_image_shape}")
+    print(f"Files is: {file_nr}")
+    print(f"File_nr is: {len(file_nr)}")
+
+    print(f"Folder_list is: {folder_list}")
+    print(f"Image shape is: {product_image_shape}")
+
+    # Save all images in one big h5py-file per image 
+    h5py_safe_location_list = save_as_h5py(img_list, fraction_list, zt_list, file_nr, interpolate_location, multiplyer, product_image_shape, use_RGB)
+    print(f"There are {len(h5py_safe_location_list)} images to reconstruct")
+
+    #@markdown If the notebook crashes because of insufficient RAM 
+    #@markdown you can select a critical size of GB of the reconstructed images which will prevent the crashing of the notebook.
+
+    # Create folder where reconstructed images are stored (depending on the mode)
+    if folder_option == "downsample-t" or folder_option == "upsample-t":
+      save_location_image = make_folder_with_date(Saving_path, "t_interpolation")
+    elif folder_option == "downsample-z" or folder_option == "upsample-z":
+      save_location_image = make_folder_with_date(Saving_path, "z_interpolation")
+    elif folder_option == "zoom":
+      save_location_image = make_folder_with_date(Saving_path, "zoom")
+
+    # Read log-file for naming the files correctly
+    df_files = pd.read_csv(log_path_file)
+
+    #----------------Save Image Stack as TIF file from h5py------------------------------#
+    file_count = 0 # necessarey in case the file is split because of a too big size
+  #  available_ram = 8 #@param {type:"slider", min:1, max:20, step:1}
+
+    #@markdown The reconstructed files will be saved in a new folder in the provided source_path labelled with mode, date and time.
+
+    for h5py_safe_location in tqdm(h5py_safe_location_list):
+      with h5py.File(h5py_safe_location, 'r') as f:
+          file_name = df_files.at[file_count, 'file_name']
+          list_keys = list(f.keys())
+
+          if use_RGB:
+            tz_dim, xy_dim,xy_dim, channels = f[list_keys[0]].shape  
+            temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim, channels)).astype('uint8')
+          else:
+            tz_dim, xy_dim,xy_dim = f[list_keys[0]].shape  
+            temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim)).astype('uint8')
+
+
+          if folder_option == "zoom":       
+            tz_dim = math.ceil(tz_dim/2)  # half the dimension because it takes every second image from the t-stack
+          image_count = 0
+          slice_count = 0
+          for image in f.values():
+            if folder_option == "zoom":  
+              if use_RGB:
+                image = image[::2,:,:,:] # take every second image in the t dimension
+              else:
+                image = image[::2,:,:] # take every second image in the t dimension
+
+            if asizeof.asizeof(temp_img) < available_ram*1000000000:
+              if use_RGB:
+                temp_img = np.append(temp_img,[image[:,:,:,:]],axis=0)
+              else:
+                temp_img = np.append(temp_img,[image[:,:,:]],axis=0)
+              # print(asizeof.asized(temp_img, detail=1).format())
+            else:
+              save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
+              slice_count +=1
+              temp_img = np.zeros((1 ,tz_dim, xy_dim,xy_dim)).astype('uint8')
+              temp_img = np.append(temp_img,[image[:,:,:]],axis=0)
+          save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
+          file_count += 1
+
+    return save_location_image
