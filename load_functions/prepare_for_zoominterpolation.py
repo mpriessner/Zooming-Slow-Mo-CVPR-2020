@@ -418,7 +418,7 @@ def get_zoomfactor(zoomfactor):
 
 
 from preparation_for_training import change_Sakuya_arch
-def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models):
+def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models, zoomfactor):
     
     img_folder_path_interpolate = sub_save_location
     shutil.rmtree("/content/ZoomInterpolation/test_example")
