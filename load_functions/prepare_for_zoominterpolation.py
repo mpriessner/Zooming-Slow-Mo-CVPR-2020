@@ -450,26 +450,26 @@ def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model
         change_Sakuya_arch(zoomfactor)
     return img_folder_path_interpolate
 
+import sys
+sys.path.insert(0,'/content/ZoomInterpolation/load_functions')
+from reconstruct_image import get_file_list
+from reconstruct_image import get_folder_list
+from reconstruct_image import save_image
+from reconstruct_image import save_as_h5py
+# from prepare_dataset_test_folders import make_folder_with_date
+import os
+import pandas as pd
+from tqdm import tqdm
+import h5py
+import numpy as np
+from timeit import default_timer as timer
+from datetime import datetime
+import h5py
+import math
+from pympler import asizeof
 
+def save_interpolated_image(interpolate_location, Saving_path, log_path_file, divisor, zoomfactor, folder_option, use_RGB):
 
-def save_interpolated_image(interpolate_location, divisor, zoomfactor, use_RGB):
-    import sys
-    sys.path.insert(0,'/content/ZoomInterpolation/load_functions')
-    from reconstruct_image import get_file_list
-    from reconstruct_image import get_folder_list
-    # from reconstruct_image import save_image
-    # from reconstruct_image import save_as_h5py
-    from prepare_dataset_test_folders import make_folder_with_date
-    import os
-    import pandas as pd
-    from tqdm import tqdm
-    import h5py
-    import numpy as np
-    from timeit import default_timer as timer
-    from datetime import datetime
-    import h5py
-    import math
-    from pympler import asizeof
 
     # create a list of the identifyer for 
     img_list         = []
@@ -547,6 +547,7 @@ def save_interpolated_image(interpolate_location, divisor, zoomfactor, use_RGB):
     #@markdown The reconstructed files will be saved in a new folder in the provided source_path labelled with mode, date and time.
 
     for h5py_safe_location in tqdm(h5py_safe_location_list):
+      available_ram = 8 # if out of ram error this value can be changed
       with h5py.File(h5py_safe_location, 'r') as f:
           file_name = df_files.at[file_count, 'file_name']
           list_keys = list(f.keys())
