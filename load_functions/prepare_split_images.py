@@ -148,7 +148,7 @@ def img_split_pipeline(Source_path, Saving_path, divisor):
 
     # Get all the paths of the images
     img_list = [f for f in os.listdir(Source_path) if f.endswith('.tif')]
-
+    
     # Create parent-folder where each split execution will be saved
     aug_saving_path = Saving_path+'/spit_source'
     if not os.path.exists(aug_saving_path):
