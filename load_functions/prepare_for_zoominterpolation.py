@@ -470,7 +470,6 @@ from pympler import asizeof
 
 def save_interpolated_image(interpolate_location, Saving_path, log_path_file, divisor, zoomfactor, folder_option, use_RGB):
 
-
     # create a list of the identifyer for 
     img_list         = []
     fraction_list    = []
