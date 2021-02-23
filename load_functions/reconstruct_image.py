@@ -29,7 +29,7 @@ def get_folder_list(source_path):
 
 
 
-def save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB):
+def save_image(temp_img, folder_option, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB):
   """ This function saves the temp image and re-structures the channels in the right order for the z-dimension"""
   # remove the first slice of zeros
   # print(f"save temp_img: {temp_img.shape}")
