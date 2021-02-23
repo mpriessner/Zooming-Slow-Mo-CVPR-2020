@@ -418,36 +418,36 @@ def get_zoomfactor(zoomfactor):
 
 
 from preparation_for_training import change_Sakuya_arch
-def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models, zoomfactor):
+def prepare_files_for_zoominterpolation_step(sub_save_location, zoomfactor):
     
     img_folder_path_interpolate = sub_save_location
     shutil.rmtree("/content/ZoomInterpolation/test_example")
     shutil.copytree(img_folder_path_interpolate,"/content/ZoomInterpolation/test_example")
     os.chdir("/content/ZoomInterpolation/codes")
 
-    if use_fine_tuned_models:
-      if zoomfactor ==1:
-        change_train_file(zoomfactor, pretrained_model_path)
-        change_Sakuya_arch(zoomfactor)
-      elif zoomfactor ==2:
-        change_train_file(zoomfactor, pretrained_model_path)
-        change_Sakuya_arch(zoomfactor)
-      elif zoomfactor ==4:
-        change_train_file(zoomfactor, pretrained_model_path)
-        change_Sakuya_arch(zoomfactor)
-    else:
-      pretrained_model_path_1x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_1x.pth"
-      pretrained_model_path_2x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_2x.pth"
-      pretrained_model_path_4x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_4x.pth"
-      if zoomfactor ==1:
-        change_train_file(zoomfactor, pretrained_model_path_1x)
-        change_Sakuya_arch(zoomfactor)
-      elif zoomfactor ==2:
-        change_train_file(zoomfactor, pretrained_model_path_2x)
-        change_Sakuya_arch(zoomfactor)
-      elif zoomfactor ==4:
-        change_train_file(zoomfactor, pretrained_model_path_4x)
-        change_Sakuya_arch(zoomfactor)
+    # if use_fine_tuned_models:
+    #   if zoomfactor ==1:
+    #     change_train_file(zoomfactor, pretrained_model_path)
+    #     change_Sakuya_arch(zoomfactor)
+    #   elif zoomfactor ==2:
+    #     change_train_file(zoomfactor, pretrained_model_path)
+    #     change_Sakuya_arch(zoomfactor)
+    #   elif zoomfactor ==4:
+    #     change_train_file(zoomfactor, pretrained_model_path)
+    #     change_Sakuya_arch(zoomfactor)
+    # else:
+    pretrained_model_path_1x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_1x.pth"
+    pretrained_model_path_2x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_2x.pth"
+    pretrained_model_path_4x = "/content/ZoomInterpolation/experiments/pretrained_models/pretrained_4x.pth"
+    if zoomfactor ==1:
+      change_train_file(zoomfactor, pretrained_model_path_1x)
+      change_Sakuya_arch(zoomfactor)
+    elif zoomfactor ==2:
+      change_train_file(zoomfactor, pretrained_model_path_2x)
+      change_Sakuya_arch(zoomfactor)
+    elif zoomfactor ==4:
+      change_train_file(zoomfactor, pretrained_model_path_4x)
+      change_Sakuya_arch(zoomfactor)
     return img_folder_path_interpolate
 
 import sys
@@ -546,23 +546,21 @@ def save_interpolated_image(interpolate_location, Saving_path, log_path_file, di
     #@markdown The reconstructed files will be saved in a new folder in the provided source_path labelled with mode, date and time.
 
     for h5py_safe_location in tqdm(h5py_safe_location_list):
-      available_ram = 8 # if out of ram error this value can be changed
+      # available_ram = 8 # if out of ram error this value can be changed
       with h5py.File(h5py_safe_location, 'r') as f:
           file_name = df_files.at[file_count, 'file_name']
           list_keys = list(f.keys())
 
           if use_RGB:
-            tz_dim, xy_dim,xy_dim, channels = f[list_keys[0]].shape  
+            tz_dim, xy_dim, xy_dim, channels = f[list_keys[0]].shape  
             temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim, channels)).astype('uint8')
           else:
             tz_dim, xy_dim,xy_dim = f[list_keys[0]].shape  
             temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim)).astype('uint8')
-
+          # import IPython; IPython.embed();# exit(1)
 
           if folder_option == "zoom":       
             tz_dim = math.ceil(tz_dim/2)  # half the dimension because it takes every second image from the t-stack
-          image_count = 0
-          slice_count = 0
           for image in f.values():
             if folder_option == "zoom":  
               if use_RGB:
@@ -570,18 +568,18 @@ def save_interpolated_image(interpolate_location, Saving_path, log_path_file, di
               else:
                 image = image[::2,:,:] # take every second image in the t dimension
 
-            if asizeof.asizeof(temp_img) < available_ram*1000000000:
-              if use_RGB:
-                temp_img = np.append(temp_img,[image[:,:,:,:]],axis=0)
-              else:
-                temp_img = np.append(temp_img,[image[:,:,:]],axis=0)
-              # print(asizeof.asized(temp_img, detail=1).format())
+            # if asizeof.asizeof(temp_img) < available_ram*1000000000:
+            if use_RGB:
+              temp_img = np.append(temp_img,[image[:,:,:,:]],axis=0)
             else:
-              save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
-              slice_count +=1
-              temp_img = np.zeros((1 ,tz_dim, xy_dim,xy_dim)).astype('uint8')
               temp_img = np.append(temp_img,[image[:,:,:]],axis=0)
-          save_image(temp_img, folder_option, slice_count, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
+              # print(asizeof.asized(temp_img, detail=1).format())
+            # save_image(temp_img, folder_option, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
+              # temp_img = np.zeros((1 ,tz_dim, xy_dim,xy_dim)).astype('uint8')
+              # temp_img = np.append(temp_img,[image[:,:,:]],axis=0)
+            # import IPython; IPython.embed();# exit(1)
+
+          save_image(temp_img, folder_option, file_count, save_location_image, file_name, zoomfactor, tz_dim, use_RGB)
           file_count += 1
 
     return save_location_image
