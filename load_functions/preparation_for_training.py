@@ -541,11 +541,10 @@ def prepare_lmbd(save_HR, save_LR, HR_input_dim, scale_factor, batch):
   mode = "LR"
   save_to_lmbd(save_LR, test_or_train, LR_input_dim, LR_input_dim, batch, mode, scale_factor)
 
-
   train_LMBD_HR = save_HR + "/vimeo7_train_x{}_HR.lmdb".format(scale_factor)
-  train_LMBD_LR = save_LR + "/vimeo7_train_x{}_HR.lmdb".format(scale_factor)
+  train_LMBD_LR = save_LR + "/vimeo7_train_x{}_LR.lmdb".format(scale_factor)
 
   test_LMBD_HR = save_HR + "/vimeo7_test_x{}_HR.lmdb".format(scale_factor)
-  test_LMBD_LR = save_LR + "/vimeo7_test_x{}_HR.lmdb".format(scale_factor)
+  test_LMBD_LR = save_LR + "/vimeo7_test_x{}_LR.lmdb".format(scale_factor)
   return train_LMBD_HR, train_LMBD_LR, test_LMBD_HR, test_LMBD_LR, LR_input_dim 
 
