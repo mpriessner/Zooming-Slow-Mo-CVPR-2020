@@ -137,3 +137,40 @@ def split_img_small(img_list, Source_path, divisor, split_img_folder_path, log_p
                 writer.writerow([f"{img_list[image_num][:-4]}",f"{name}.tif"])
     return multiplyer
 
+
+def img_split_pipeline(Source_path, Saving_path, divisor):
+
+    # Write a log file for keeping track of the names
+    log_path_file = Saving_path + "/" + "split_log.csv"
+    with open(log_path_file, 'w', newline='') as file:
+          writer = csv.writer(file)
+          writer.writerow(["file_name", "split_name"])
+
+    # Get all the paths of the images
+    img_list = [f for f in os.listdir(Source_path) if f.endswith('.tif')]
+
+    # Create parent-folder where each split execution will be saved
+    aug_saving_path = Saving_path+'/spit_source'
+    if not os.path.exists(aug_saving_path):
+      os.mkdir(aug_saving_path)
+      
+    # create a folder where split images are being stored
+    split_img_folder_path = make_folder_with_date(aug_saving_path, "split")
+    os.chdir(split_img_folder_path)
+
+    # Throw warning if the divisor is bigger than the actual images
+    img_path = os.path.join(Source_path,img_list[0])
+    img = io.imread(img_path)
+    if img.shape[-2]< divisor:
+      print(bcolors.WARNING + "The divisor is bigger than the dimension of the images")
+
+    # If channel is not a 4D+T image it will create it here and provide information on if it is a RGB image
+    img, use_RGB = correct_channels(img)
+
+    # Display the information and get the dimensions of the image
+    nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div  = diplay_img_info(img, divisor, use_RGB)
+
+    multiplyer = split_img_small(img_list, Source_path, divisor, split_img_folder_path, log_path_file)
+
+    return aug_saving_path, split_img_folder_path, log_path_file, multiplyer, nr_z_slices, nr_channels, nr_timepoints, x_dim, y_dim, x_div, y_div, use_RGB 
+
