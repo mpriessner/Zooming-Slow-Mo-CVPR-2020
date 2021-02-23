@@ -355,7 +355,7 @@ def change_train_file(zoomfactor, model_path):
 
 #############################################################################
 
-def data_preparation_for_zoominterpolation(folder_option, save_location):
+def data_preparation_for_zoominterpolation(folder_option, save_location, split_img_folder_path):
     if folder_option == "upsample-t":
       name = "upsample-t"
       img_path_list = []
@@ -401,9 +401,9 @@ def data_preparation_for_zoominterpolation(folder_option, save_location):
 from preparation_for_training import change_Sakuya_arch
 
 def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models):
+    
     img_folder_path_interpolate = sub_save_location
-
-    !rm -rf "/content/ZoomInterpolation/test_example"
+    shutil.rmtree("/content/ZoomInterpolation/test_example")
     shutil.copytree(img_folder_path_interpolate,"/content/ZoomInterpolation/test_example")
     os.chdir("/content/ZoomInterpolation/codes")
 
@@ -430,7 +430,7 @@ def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model
       elif zoomfactor ==4:
         change_train_file(zoomfactor, pretrained_model_path_4x)
         change_Sakuya_arch(zoomfactor)
-  return img_folder_path_interpolate
+    return img_folder_path_interpolate
 
 
 
