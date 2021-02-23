@@ -355,6 +355,9 @@ def change_train_file(zoomfactor, model_path):
 
 #############################################################################
 
+
+
+
 def data_preparation_for_zoominterpolation(folder_option, save_location, split_img_folder_path):
     if folder_option == "upsample-t":
       name = "upsample-t"
@@ -398,8 +401,23 @@ def data_preparation_for_zoominterpolation(folder_option, save_location, split_i
     return sub_save_location
 
 
-from preparation_for_training import change_Sakuya_arch
+def get_zoomfactor(zoomfactor):
+    if zoomfactor == 16:
+      zoomfactor_1 = 4
+      zoomfactor_2 = 4
+    if zoomfactor == 8:
+      zoomfactor_1 = 4
+      zoomfactor_2 = 2
+    if zoomfactor == 4:
+      zoomfactor_1 = 4
+      zoomfactor_2 = 1
+    if zoomfactor == 2:
+      zoomfactor_1 = 2
+      zoomfactor_2 = 1
+    return zoomfactor_1, zoomfactor_2
 
+
+from preparation_for_training import change_Sakuya_arch
 def prepare_files_for_zoominterpolation_step(sub_save_location, pretrained_model_path, use_fine_tuned_models):
     
     img_folder_path_interpolate = sub_save_location
