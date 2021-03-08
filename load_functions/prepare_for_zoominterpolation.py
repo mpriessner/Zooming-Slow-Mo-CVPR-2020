@@ -553,14 +553,16 @@ def save_interpolated_image(interpolate_location, Saving_path, log_path_file, di
 
           if use_RGB:
             tz_dim, xy_dim, xy_dim, channels = f[list_keys[0]].shape  
+            if folder_option == "zoom":       
+                tz_dim = math.ceil(tz_dim/2)  # half the dimension because it takes every second image from the t-stack
             temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim, channels)).astype('uint8')
           else:
             tz_dim, xy_dim,xy_dim = f[list_keys[0]].shape  
+            if folder_option == "zoom":       
+                tz_dim = math.ceil(tz_dim/2)  # half the dimension because it takes every second image from the t-stack
             temp_img = np.zeros((1 ,tz_dim, xy_dim, xy_dim)).astype('uint8')
           # import IPython; IPython.embed();# exit(1)
 
-          if folder_option == "zoom":       
-            tz_dim = math.ceil(tz_dim/2)  # half the dimension because it takes every second image from the t-stack
           for image in f.values():
             if folder_option == "zoom":  
               if use_RGB:
