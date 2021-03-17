@@ -414,6 +414,9 @@ def get_zoomfactor(zoomfactor):
     if zoomfactor == 2:
       zoomfactor_1 = 2
       zoomfactor_2 = 1
+    if zoomfactor == 1:
+      zoomfactor_1 = 1
+      zoomfactor_2 = 1
     return zoomfactor_1, zoomfactor_2
 
 
