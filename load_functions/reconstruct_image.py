@@ -39,7 +39,7 @@ def save_image(temp_img, folder_option, file_count, save_location_image, file_na
     temp_img_final = temp_img[1:,:,:,:]
     
   if folder_option == "upsample-z" or folder_option == "downsample-z":
-    if (tz_dim % 2) != 0: # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
+    if (tz_dim % 2) == 0: # this is necessary because if the number is uneven then i added the last image, which otherwise would have been ignored and therefore I need to remove it here again to recreate the same dimensions as the input image
       if use_RGB:
         temp_img_final = temp_img_final[:,:-1,:,:,:] # remove the last image to get the same dimensions
       else: 
