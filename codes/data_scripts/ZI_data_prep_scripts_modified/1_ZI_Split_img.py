@@ -34,6 +34,11 @@ def correct_channels(img):
     zeros = np.zeros((t,1,y,x))
     zeros[:,0,:,:] = img
     img = zeros
+  elif len(img.shape) ==3 and use_RGB: # to be able to handle normal 2D + RGB images
+    y, x, c = img.shape
+    zeros = np.zeros((1,1,y,x,c))
+    zeros[0,0,:,:,:] = img
+    img = zeros
   return img, use_RGB
 
 def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, continue_loading, N_frames, log_path):
