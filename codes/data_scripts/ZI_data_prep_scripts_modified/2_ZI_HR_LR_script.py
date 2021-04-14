@@ -296,7 +296,7 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
 
 
 def em_AG_D_sameas_preprint(x, scale, upsample=False):
-    if x.shape == 3:
+    if len(x.shape) == 3:
         x_dim, y_dim, c = x.shape
         x1 = x[:,:,0]
         x1 = random_noise(x1, mode='localvar', local_vars=(lvar+0.0001)*0.05)
@@ -313,11 +313,14 @@ def em_AG_D_sameas_preprint(x, scale, upsample=False):
         img_temp[:,:,0] = x_down1
         img_temp[:,:,1] = x_down2
         img_temp[:,:,2] = x_down3
-    else:
-        x_dim, y_dim = x.shape
+    if len(x.shape) == 2:
+        x_dim, y_dim = x.shape # ,c
+        # x = x[:,:,0]
+
         lvar = filters.gaussian(x, sigma=3,)
         x = random_noise(x, mode='localvar', local_vars=(lvar+0.0001)*0.05)
         x_down = npzoom(x, 1/scale, order=1)
+        
         img_temp = np.zeros((int(x_dim/scale),int(y_dim/scale),3))
         img_temp[:,:,0] = x_down
         img_temp[:,:,1] = x_down
@@ -325,6 +328,22 @@ def em_AG_D_sameas_preprint(x, scale, upsample=False):
     x_down = img_temp
     return x_down#, x_up
 
+
+# for testing
+# import cv2
+# file = r"Z:\Martin Priessner\XXX__External_dataset\training_EM\trainsources\HR_1_stacks\sequences_Gauss_3\00001\0038\im1.png"
+# image = cv2.imread(file)
+# image.dtype
+# # image = image[:,:,0]
+# scale = 4
+# # x = image
+# image.shape
+# image.min()
+# image.max()
+# x_down= em_AG_D_sameas_preprint(image, scale=4, upsample=False)
+# x_down.shape
+# io.imsave(r"Z:\Martin Priessner\XXX__External_dataset\training_EM\trainsources\HR_1_stacks\x_down2.png", x_down)
+# lvar.min()
 
 
 
