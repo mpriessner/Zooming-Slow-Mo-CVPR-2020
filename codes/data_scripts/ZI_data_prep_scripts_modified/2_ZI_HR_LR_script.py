@@ -280,6 +280,8 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
             else:
                 image_HR = image[0:up_scale * height, 0:up_scale * width]
             # LR
+            image_LR = em_AG_D_sameas_preprint(image_HR, scale=up_scale, upsample=False) 
+
             image_LR = imresize_np(image_HR, 1 / up_scale, True)
             file_folder_path = filename[-18:]
             path_HR = r"{}\\{}".format(saveHRpath, file_folder_path)
@@ -291,6 +293,38 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
               f.write('No.{} -- failed {}\n'.format(i, filename))     
 
     return save_HR, save_LR
+
+
+def em_AG_D_sameas_preprint(x, scale, upsample=False):
+    if x.shape == 3:
+        x_dim, y_dim, c = x.shape
+        x1 = x[:,:,0]
+        x1 = random_noise(x1, mode='localvar', local_vars=(lvar+0.0001)*0.05)
+        x_down1 = npzoom(x1, 1/scale, order=1)
+
+        x2 = x[:,:,0]
+        x2 = random_noise(x2, mode='localvar', local_vars=(lvar+0.0001)*0.05)
+        x_down2 = npzoom(x2, 1/scale, order=1)
+
+        x3 = x[:,:,0]
+        x3 = random_noise(x3, mode='localvar', local_vars=(lvar+0.0001)*0.05)
+        x_down3 = npzoom(x3, 1/scale, order=1)
+        img_temp = np.zeros((int(x_dim/scale),int(y_dim/scale), c))
+        img_temp[:,:,0] = x_down1
+        img_temp[:,:,1] = x_down2
+        img_temp[:,:,2] = x_down3
+    else:
+        x_dim, y_dim = x.shape
+        lvar = filters.gaussian(x, sigma=3,)
+        x = random_noise(x, mode='localvar', local_vars=(lvar+0.0001)*0.05)
+        x_down = npzoom(x, 1/scale, order=1)
+        img_temp = np.zeros((int(x_dim/scale),int(y_dim/scale),3))
+        img_temp[:,:,0] = x_down
+        img_temp[:,:,1] = x_down
+        img_temp[:,:,2] = x_down
+    x_down = img_temp
+    return x_down#, x_up
+
 
 
 
