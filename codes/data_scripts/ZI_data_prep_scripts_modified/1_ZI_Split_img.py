@@ -25,7 +25,7 @@ def correct_channels(img):
   else:
     use_RGB = False
   if len(img.shape) ==4 and use_RGB:
-    t, x, y, c = img.shape
+    t, y, x, c = img.shape
     zeros = np.zeros((t,1,y,x,c))
     zeros[:,0,:,:,:] = img
     img = zeros
