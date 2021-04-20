@@ -294,37 +294,39 @@ def generate_mod_LR(up_scale, sourcedir, savedir, train_guide, test_guide, conti
 
     return save_HR, save_LR
 
+from scipy.ndimage.interpolation import zoom as npzoom
+from skimage import filters
+from skimage.util import random_noise, img_as_ubyte, img_as_float
+from scipy.ndimage.interpolation import zoom as npzoom
+from skimage.transform import rescale
+import PIL
+from skimage import io
+import numpy as np
 
 def em_AG_D_sameas_preprint(x, scale, upsample=False):
+     lvar = filters.gaussian(x, sigma=3)
     if len(x.shape) == 3:
         x_dim, y_dim, c = x.shape
         x1 = x[:,:,0]
+        lvar = filters.gaussian(x1, sigma=3)
+
         x1 = random_noise(x1, mode='localvar', local_vars=(lvar+0.0001)*0.05)
-        x_down1 = npzoom(x1, 1/scale, order=1)
-
-        x2 = x[:,:,0]
-        x2 = random_noise(x2, mode='localvar', local_vars=(lvar+0.0001)*0.05)
-        x_down2 = npzoom(x2, 1/scale, order=1)
-
-        x3 = x[:,:,0]
-        x3 = random_noise(x3, mode='localvar', local_vars=(lvar+0.0001)*0.05)
-        x_down3 = npzoom(x3, 1/scale, order=1)
-        img_temp = np.zeros((int(x_dim/scale),int(y_dim/scale), c))
-        img_temp[:,:,0] = x_down1
-        img_temp[:,:,1] = x_down2
-        img_temp[:,:,2] = x_down3
-    if len(x.shape) == 2:
-        x_dim, y_dim = x.shape # ,c
-        # x = x[:,:,0]
-
-        lvar = filters.gaussian(x, sigma=3,)
-        x = random_noise(x, mode='localvar', local_vars=(lvar+0.0001)*0.05)
-        x_down = npzoom(x, 1/scale, order=1)
+        # x_down1 = npzoom(x1, 1/scale, order=1)
         
-        img_temp = np.zeros((int(x_dim/scale),int(y_dim/scale),3))
-        img_temp[:,:,0] = x_down
-        img_temp[:,:,1] = x_down
-        img_temp[:,:,2] = x_down
+        img_temp = np.zeros((int(x_dim),int(y_dim),c))
+        img_temp[:,:,0] = x1
+        img_temp[:,:,1] = x1
+        img_temp[:,:,2] = x1
+    if len(x.shape) == 2:
+        x_dim, y_dim = x.shape
+        x1 = random_noise(x, mode='localvar', local_vars=(lvar+0.0001)*0.05)
+        # x_down1 = npzoom(x1, 1/scale, order=1)
+        
+        img_temp = np.zeros((int(x_dim),int(y_dim),3))
+        img_temp[:,:,0] = x1
+        img_temp[:,:,1] = x1
+        img_temp[:,:,2] = x1
+ 
     x_down = img_temp
     return x_down#, x_up
 
