@@ -86,7 +86,7 @@ def vimeo7_2(mode):
     print('Read images with multiprocessing, #thread: {} ...'.format(n_thread))
     
     #### create lmdb environment
-    env = lmdb.open(lmdb_save_path, map_size=data_size * 3)
+    env = lmdb.open(lmdb_save_path, map_size=data_size * 3)  ### for big datasets if error occures change 3 to a higher number 
     txn = env.begin(write=True)  # txn is a Transaction object
 
     #### write data to lmdb
